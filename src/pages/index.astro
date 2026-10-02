@@ -1,5 +1,4 @@
 ---
-import { getLatestPosts } from "../lib/contentful";
 import { headerSponsors } from "../lib/sponsors";
 import Layout from "../layouts/Layout.astro";
 import Header from "../components/Header.astro";
@@ -9,21 +8,6 @@ import SectionTitle from "../components/brand/SectionTitle.astro";
 import BrandButton from "../components/brand/BrandButton.astro";
 import Competitions from "../../public/json/competitions.json";
 import InternalInitiatives from "../../public/json/internal_initiatives.json";
-import { format } from "date-fns";
-import { es } from "date-fns/locale";
-
-const posts = (await getLatestPosts(3)).map((item) => {
-  const { title, slug, date, headerImg, description, category, readTime } = item.fields;
-  return {
-    title,
-    slug,
-    date: date ? new Date(date) : null,
-    image: headerImg && "fields" in headerImg ? headerImg.fields.file?.url : undefined,
-    description,
-    category: category || "Noticias",
-    readTime: readTime || "5",
-  };
-});
 
 const mainSponsors = headerSponsors();
 const initiatives = InternalInitiatives.initiatives;
@@ -87,33 +71,6 @@ const initiatives = InternalInitiatives.initiatives;
     </section>
 
     <div class="mx-auto max-w-6xl px-6 flex flex-col gap-28 pt-24">
-      <!-- Noticias (Contentful). En local sin credenciales no hay posts y se omite. -->
-      {
-        posts.length > 0 && (
-          <section>
-            <SectionTitle id="noticias" eyebrow="Actualidad" title="Últimas noticias" link={{ href: "/work", label: "Ver todas las noticias" }} />
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {posts.map((post) => (
-                <a href={`/work/${post.slug}`} class="group flex flex-col gap-4 overflow-hidden rounded-xl bg-[#181818] border border-zinc-800/30 pb-5 hover:-translate-y-2 transition-all [&>*:not(:first-child)]:px-5">
-                  <div class="overflow-hidden bg-tars-50 aspect-[4/3]">
-                    {post.image && (
-                      <img src={post.image} alt="" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" />
-                    )}
-                  </div>
-                  <p class="text-xs uppercase tracking-wide text-tars">
-                    {post.category}
-                    {post.date && ` · ${format(post.date, "d MMM yyyy", { locale: es })}`}
-                    {` · ${post.readTime} min`}
-                  </p>
-                  <h3 class="text-xl font-semibold leading-snug group-hover:text-tars transition-colors">{post.title}</h3>
-                  {post.description && <p class="text-ink/75 line-clamp-3">{post.description}</p>}
-                </a>
-              ))}
-            </div>
-          </section>
-        )
-      }
-
       <!-- Sobre nosotros: resumen; el detalle vive en /team -->
       <section class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
         <div>
