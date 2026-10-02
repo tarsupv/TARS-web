@@ -22,3 +22,6 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# fuentes pesadas del modelo 3D (se regeneran con tools/prepare_rover_source.sh)
+tools/model-source/

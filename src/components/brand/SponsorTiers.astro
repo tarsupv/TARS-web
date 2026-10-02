@@ -1,0 +1,82 @@
+---
+// Patrocinadores por secciones: una seccion por nivel del dossier (Platino,
+// Oro, Plata, Bronce), los que aun no tienen nivel, los colaboradores
+// principales y el respaldo institucional.
+// Los logos van sobre ficha blanca: muchos son oscuros y sobre fondo negro
+// desaparecerian.
+import {
+  institutionalPartners,
+  mainCollaborators,
+  sponsorsByTier,
+  untieredSponsors,
+  type Sponsor,
+} from "../../lib/sponsors";
+
+interface Props {
+  /** Muestra la descripcion de cada patrocinador. */
+  detailed?: boolean;
+}
+
+const { detailed = false } = Astro.props;
+
+interface Group {
+  label: string;
+  note?: string;
+  logoHeight: number;
+  items: Sponsor[];
+  /** Se muestra aunque este vacio (las secciones por nivel). */
+  always?: boolean;
+}
+
+const tierGroups: Group[] = sponsorsByTier().map((t) => ({
+  label: t.label,
+  note: t.inHeader ? "También en la cabecera" : undefined,
+  logoHeight: Math.round(t.carouselHeight * 0.85),
+  items: t.sponsors,
+  always: true,
+}));
+
+// Primero los niveles de pago seguidos; al final, junto al respaldo
+// institucional, los colaboradores principales.
+const allGroups: Group[] = [
+  ...tierGroups,
+  { label: "Patrocinadores", logoHeight: 48, items: untieredSponsors() },
+  { label: "Colaboradores principales", note: "También en la cabecera", logoHeight: 72, items: mainCollaborators() },
+  { label: "Respaldo institucional", logoHeight: 56, items: institutionalPartners() },
+];
+const groups = allGroups.filter((g) => g.always || g.items.length);
+---
+
+<div class="flex flex-col">
+  {
+    groups.map((group) => (
+      <div class="grid grid-cols-1 md:grid-cols-[220px_1fr] gap-4 md:gap-10 py-8 border-t border-zinc-800 first:border-t-2 first:border-blue-500">
+        <div class="flex md:flex-col items-baseline md:items-start gap-3 md:gap-1">
+          <span class="font-display font-extrabold uppercase text-tars text-lg tracking-wide">{group.label}</span>
+          {group.note && <span class="text-xs text-white/50">{group.note}</span>}
+        </div>
+        <div class="flex flex-wrap items-start gap-x-8 gap-y-6">
+          {group.items.length === 0 && (
+            <span class="flex items-center rounded-lg border border-dashed border-zinc-700 px-5 py-3 text-sm text-white/45" style={`min-height:${group.logoHeight + 24}px`}>
+              Espacio reservado a patrocinadores {group.label.toLowerCase()}
+            </span>
+          )}
+          {group.items.map((sponsor) => (
+            <a href={sponsor.url} target="_blank" rel="noopener noreferrer" class="group flex flex-col gap-3 max-w-[280px]" title={sponsor.name}>
+              <span class="flex items-center justify-center rounded-lg bg-white px-5 py-3 opacity-90 group-hover:opacity-100 transition-opacity">
+                <img
+                  src={sponsor.logo}
+                  alt={sponsor.name}
+                  style={`height:${group.logoHeight}px`}
+                  class="w-auto max-w-[240px] object-contain"
+                  loading="lazy"
+                />
+              </span>
+              {detailed && sponsor.description && <p class="text-sm text-white/65 leading-relaxed">{sponsor.description}</p>}
+            </a>
+          ))}
+        </div>
+      </div>
+    ))
+  }
+</div>

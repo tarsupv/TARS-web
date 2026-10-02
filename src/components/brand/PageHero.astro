@@ -1,0 +1,34 @@
+---
+// Cabecera de las paginas interiores: fondo oscuro con particulas y degradado,
+// titulo repetido en Braille de fondo; texto con la tipografia del dossier.
+interface Props {
+  title: string;
+  eyebrow?: string;
+  description?: string;
+}
+const { title, eyebrow, description } = Astro.props;
+---
+
+<section class="relative w-screen overflow-hidden pt-20">
+  <div class="old-headtitle-bg absolute inset-0">
+    <iframe src="/html/particles.html" title="" class="top-0 left-0 opacity-60 w-screen h-screen absolute pointer-events-none" tabindex="-1"></iframe>
+  </div>
+  <div class="relative mx-auto max-w-6xl px-6 pt-20 pb-16 flex flex-col gap-4">
+    {eyebrow && <p class="font-wide uppercase tracking-[0.2em] sm:tracking-[0.3em] text-white/80 text-sm sm:text-base">{eyebrow}</p>}
+    <div class="relative">
+      <h1 class="font-display font-extrabold uppercase text-4xl sm:text-6xl leading-none text-white relative z-10">{title}</h1>
+      <span aria-hidden="true" class="hidden sm:block absolute -top-6 left-0 text-9xl font-bold font-[Braille] text-white/5 whitespace-nowrap">{title}</span>
+    </div>
+    {description && <p class="max-w-2xl text-lg text-white/80 font-light">{description}</p>}
+    <slot />
+  </div>
+</section>
+
+<style>
+  .old-headtitle-bg {
+    opacity: 0.3;
+    background: linear-gradient(45deg, rgba(14, 14, 107, 0.6), rgba(209, 24, 209, 0.6), rgba(173, 216, 230, 1));
+    mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1), rgba(0, 0, 0, 0));
+    -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 1), rgba(0, 0, 0, 0));
+  }
+</style>

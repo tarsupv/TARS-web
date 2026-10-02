@@ -1,21 +1,27 @@
 {
+  "season": "2026-27",
   "competitions": [
     {
-      "image": "https://www.spaceagenda.com/wp-content/uploads/2024/07/erc-featured-min-1024x597-1.webp",
-      "title": "ERC",
-      "description": "European Rover Challenge (ERC) es una competición internacional de robótica espacial donde equipos de todo el mundo diseñan y construyen rovers para realizar misiones en un entorno simulado de Marte.",
+      "title": "RoboChallenge",
+      "date": "30 octubre – 1 noviembre de 2026",
+      "place": "Bucarest, Rumanía",
+      "description": "Competición internacional de robótica estudiantil en Bucarest, con pruebas de micro robótica.",
+      "logo": "/img/brand/comp-robochallenge.webp"
+    },
+    {
+      "title": "Robolid",
+      "date": "11 de abril de 2027",
+      "place": "Valladolid, España",
+      "description": "Campeonato nacional de robótica en Valladolid, donde en 2026 fuimos 3º de España en lucha de robots de 1 lb.",
+      "logo": "/img/brand/comp-robolid.webp"
+    },
+    {
+      "title": "European Rover Challenge 2027",
+      "date": "Finales de agosto de 2027",
+      "place": "Polonia",
+      "description": "Una de las mayores competiciones europeas de rovers de exploración planetaria; presentamos un rover autónomo con dron de apoyo.",
+      "logo": "/img/brand/comp-erc.webp",
       "link": "https://roverchallenge.eu/"
-    },
-    {
-      "image": "https://thumbs.dreamstime.com/b/uav-drone-modern-cityscape-communication-network-concept-telecommunication-smart-city-iot-ict-g-ai-generated-uav-drone-318726787.jpg",
-      "title": "Drone Inteligente (ERC)",
-      "description": "La competición de ERC también desafía a los equipos a desarrollar drones autónomos capaces de realizar tareas complejas, como navegación, reconocimiento y manipulación de objetos en entornos dinámicos."
-    },
-    {
-      "image": "https://battlebots.com/wp-content/uploads/2023/11/IMG_9072.jpg",
-      "title": "Robochallenge",
-      "description": "Robochallenge es una competición de robótica donde equipos diseñan y construyen robots de combate que se enfrentan en una arena, utilizando diversas armas y estrategias para derrotar a sus oponentes.",
-      "link": "https://robochallenge.ro/"
     }
   ]
 }

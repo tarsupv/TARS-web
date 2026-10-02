@@ -2,7 +2,9 @@
 import Layout from "../../layouts/Layout.astro";
 import Header from "../../components/Header.astro";
 import Footer from "../../components/Footer.astro";
-import HeadTitle from "../../components/HeadTitle.astro";
+import PageHero from "../../components/brand/PageHero.astro";
+import SectionTitle from "../../components/brand/SectionTitle.astro";
+import BrandButton from "../../components/brand/BrandButton.astro";
 import Tutorials from "../../../public/json/tutorials.json";
 
 const workshops = Tutorials.workshops || [];
@@ -10,291 +12,140 @@ const teacherCommunity = Tutorials.teacherCommunity;
 
 const getYouTubeVideoId = (url: string) => {
   if (!url) return null;
-
   try {
     const parsed = new URL(url);
     const host = parsed.hostname.replace("www.", "");
     const path = parsed.pathname;
-
-    if (host === "youtu.be") {
-      const id = path.slice(1).split("/")[0];
-      return id || null;
-    }
-
+    if (host === "youtu.be") return path.slice(1).split("/")[0] || null;
     if (host === "youtube.com" || host === "m.youtube.com") {
-      if (path === "/watch") {
-        return parsed.searchParams.get("v");
-      }
-
-      if (path.startsWith("/shorts/")) {
-        return path.split("/")[2] || null;
-      }
+      if (path === "/watch") return parsed.searchParams.get("v");
+      if (path.startsWith("/shorts/")) return path.split("/")[2] || null;
     }
-
     return null;
   } catch {
     return null;
   }
 };
+
+const resources = [
+  {
+    eyebrow: "Recursos para docentes",
+    title: "Descarga la librería preparada por TARS",
+    text: "Una librería lista para usar en clase y en la competición. Descarga el paquete más reciente desde GitHub e incorpóralo directamente a vuestros proyectos de UN Robotics.",
+    cta: "Descargar librería",
+    href: "https://github.com/UPV-TARS/UN-Robotics/releases/latest/download/TARS.zip",
+  },
+  {
+    eyebrow: "Control del robot",
+    title: "Descarga la aplicación Android",
+    text: "La APK oficial para controlar el robot desde un dispositivo Android. Descárgala y úsala durante las pruebas y la competición.",
+    cta: "Descargar APK",
+    href: "https://drive.google.com/file/d/1RRGvoXQ9Q7XJcsCXN9pn9xOktdNoo7wa/view?usp=sharing",
+  },
+];
 ---
 
 <Layout
-  title="Talleres ONU | TARS UPV"
-  description="Tutoriales y recursos de TARS UPV para la competicion de la ONU."
+  title="UN Robotics | TARS Robotics UPV"
+  description="Tutoriales y recursos de TARS UPV para la competición de robótica de la ONU."
+ 
 >
   <Header />
-  <HeadTitle
-    icon="/img/youtube.svg"
-    text="Talleres ONU"
-    description="Tutoriales y recursos para preparar la competicion."
+  <PageHero
+    eyebrow="Colaboración con Naciones Unidas"
+    title="UN Robotics"
+    description="Tutoriales y recursos para preparar la UN Robotics Competition."
   />
 
-  <main class="-translate-y-[30px] px-6 sm:px-36 pb-16">
-    <section class="rounded-2xl border border-blue-400/20 bg-[linear-gradient(135deg,_rgba(15,23,42,0.98),_rgba(10,10,10,0.98))] p-6 sm:p-8">
-      <div class="flex flex-col gap-6">
-        <div class="w-full text-center">
-          <p class="text-xs uppercase tracking-[0.28em] text-blue-300">
-            Colaboracion activa
-          </p>
-          <p class="mt-3 text-base leading-relaxed text-white/75 sm:text-lg">
-            Esta colaboracion entre TARS Robotics UPV y el United Nations Global Service Center en Valencia tiene como objetivo apoyar a la comunidad de la UN Robotics Competition mediante tutoriales de hardware y software para ayudar a docentes y estudiantes a disenar y construir su propio robot, ademas de ofrecer acceso a un grupo de WhatsApp donde resolver dudas y recibir apoyo directo de nuestro equipo.
-          </p>
-        </div>
-      </div>
-    </section>
+  <main class="mx-auto max-w-6xl px-6 pt-20 flex flex-col gap-24">
+    <p class="text-lg sm:text-xl leading-relaxed max-w-4xl">
+      Esta colaboración entre <span class="text-tars">TARS Robotics UPV</span> y el
+      <span class="text-tars">United Nations Global Service Center</span> en Valencia apoya a la
+      comunidad de la UN Robotics Competition con tutoriales de hardware y software para que
+      docentes y estudiantes diseñen y construyan su propio robot, además de un grupo de
+      WhatsApp donde resolver dudas con ayuda directa de nuestro equipo.
+    </p>
 
-    <section class="mt-6 overflow-hidden rounded-2xl border border-cyan-400/20 bg-[radial-gradient(circle_at_top_right,_rgba(34,211,238,0.18),_transparent_30%),linear-gradient(135deg,_rgba(8,20,28,0.98),_rgba(10,10,10,0.98))] p-6 sm:p-8">
-      <div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-        <div class="max-w-3xl">
-          <p class="text-xs uppercase tracking-[0.28em] text-cyan-300">
-            Recursos para docentes
-          </p>
-          <h2 class="mt-3 text-3xl font-bold text-white sm:text-4xl">
-            Descarga la libreria preparada por TARS
-          </h2>
-          <p class="mt-4 text-base leading-relaxed text-white/75 sm:text-lg">
-            Hemos preparado una libreria lista para usar en clase y en la competicion. Puedes descargar el paquete mas reciente desde GitHub e incorporarlo directamente a vuestros proyectos de UN Robotics.
-          </p>
-        </div>
-
-        <a
-          href="https://github.com/UPV-TARS/UN-Robotics/releases/latest/download/TARS.zip"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="inline-flex h-fit items-center justify-center gap-2 rounded-xl bg-cyan-400 px-5 py-3 font-semibold text-[#06131a] transition-colors hover:bg-cyan-300 md:shrink-0"
-        >
-          Descargar libreria
-          <img
-            src="https://unpkg.com/pixelarticons@1.8.1/svg/download.svg"
-            alt="Descargar"
-            class="h-5 w-5"
-          />
-        </a>
-      </div>
-    </section>
-
-    <section class="mt-6 overflow-hidden rounded-2xl border border-amber-400/20 bg-[radial-gradient(circle_at_top_left,_rgba(251,191,36,0.16),_transparent_35%),linear-gradient(135deg,_rgba(28,21,8,0.98),_rgba(10,10,10,0.98))] p-6 sm:p-8">
-      <div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
-        <div class="max-w-3xl">
-          <p class="text-xs uppercase tracking-[0.28em] text-amber-300">
-            Control del robot
-          </p>
-          <h2 class="mt-3 text-3xl font-bold text-white sm:text-4xl">
-            Descarga la aplicacion Android
-          </h2>
-          <p class="mt-4 text-base leading-relaxed text-white/75 sm:text-lg">
-            Ponemos a disposicion la APK oficial para controlar el robot desde un dispositivo Android. Descargala directamente y usala durante las pruebas y la competicion.
-          </p>
-        </div>
-
-        <a
-          href="https://drive.google.com/file/d/1RRGvoXQ9Q7XJcsCXN9pn9xOktdNoo7wa/view?usp=sharing"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="inline-flex h-fit items-center justify-center gap-2 rounded-xl bg-amber-400 px-5 py-3 font-semibold text-[#1a1204] transition-colors hover:bg-amber-300 md:shrink-0"
-        >
-          Descargar APK
-          <img
-            src="https://unpkg.com/pixelarticons@1.8.1/svg/download.svg"
-            alt="Descargar"
-            class="h-5 w-5"
-          />
-        </a>
-      </div>
-    </section>
-
-    <section
-      class="mt-6 w-full rounded-2xl border border-zinc-800/40 bg-gradient-to-br from-[#1a1a1a] to-[#121212] p-6 sm:p-10"
-    >
-      <div class="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
-        <div>
-          <span class="inline-block text-blue-500 text-sm font-medium mb-2">
-            FORMACION
-          </span>
-          <h2 class="text-white text-3xl sm:text-4xl font-bold mb-4">
-            Accede a los tutoriales oficiales
-          </h2>
-          <p class="text-white/70 max-w-3xl">
-            Esta seccion centraliza los talleres para la competicion de la ONU.
-            Puedes verlos en nuestro canal y revisar cada bloque segun nivel.
-          </p>
-        </div>
-
-        <a
-          href={Tutorials.featuredChannelUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          class="h-fit inline-flex items-center gap-2 rounded-md bg-red-600 px-4 py-3 text-white font-semibold hover:bg-red-500 transition-colors md:shrink-0"
-        >
-          Ver canal de YouTube
-          <img
-            src="https://unpkg.com/pixelarticons@1.8.1/svg/external-link.svg"
-            alt="Abrir"
-            class="w-5 h-5 invert"
-          />
-        </a>
-      </div>
-    </section>
-
-    <section class="mt-10 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-8">
       {
-        workshops.map((workshop) => (
-          <article class="group rounded-xl border border-zinc-800/40 bg-[#171717] p-6 hover:-translate-y-1 transition-all">
-            <div class="flex items-center gap-3">
-              <span class="text-xs text-blue-400 bg-blue-500/10 rounded-full px-3 py-1">
-                {workshop.level}
-              </span>
+        resources.map((r) => (
+          <div class="rounded-xl bg-[#181818] border border-zinc-800/30 p-6 flex flex-col gap-4">
+            <p class="text-tars text-xs font-semibold uppercase tracking-[0.15em]">{r.eyebrow}</p>
+            <h2 class="font-display font-extrabold text-2xl">{r.title}</h2>
+            <p class="leading-relaxed text-ink/80">{r.text}</p>
+            <div class="mt-auto pt-2">
+              <BrandButton href={r.href} external>{r.cta}</BrandButton>
             </div>
+          </div>
+        ))
+      }
+    </section>
 
-            <h3 class="mt-4 text-white text-2xl font-bold leading-tight">
-              {workshop.title}
-            </h3>
-            <p class="mt-3 text-white/70 line-clamp-3">{workshop.description}</p>
-
-            <div class="mt-4 rounded-lg overflow-hidden border border-zinc-700/60 bg-black/30">
-              {
-                getYouTubeVideoId(workshop.youtubeUrl) ? (
+    <section>
+      <SectionTitle
+        id="tutoriales"
+        eyebrow="Formación"
+        title="Tutoriales oficiales"
+        link={{ href: Tutorials.featuredChannelUrl, label: "Ver canal de YouTube" }}
+      />
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-x-8 gap-y-12">
+        {
+          workshops.map((workshop) => {
+            const videoId = getYouTubeVideoId(workshop.youtubeUrl);
+            return (
+              <article class="flex flex-col gap-4">
+                {videoId ? (
                   <iframe
-                    class="w-full aspect-video"
-                    src={`https://www.youtube-nocookie.com/embed/${getYouTubeVideoId(workshop.youtubeUrl)}`}
-                    title={`Snippet ${workshop.title}`}
+                    class="w-full aspect-video bg-tars-50"
+                    src={`https://www.youtube-nocookie.com/embed/${videoId}`}
+                    title={workshop.title}
                     loading="lazy"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                     allowfullscreen
                   />
                 ) : (
-                  <div class="w-full aspect-video flex flex-col items-center justify-center gap-2 text-center px-4">
-                    <img
-                      src="/img/youtube.svg"
-                      alt="YouTube"
-                      class="w-8 h-8 invert opacity-80"
-                    />
-                    <p class="text-white/80 text-sm">
-                      AÃ±ade una URL directa de video para ver el snippet aqui.
-                    </p>
+                  <div class="w-full aspect-video bg-tars-50 flex items-center justify-center text-center px-6 text-sm text-ink/60">
+                    Añade una URL directa de vídeo para mostrar el tutorial aquí.
                   </div>
-                )
-              }
-            </div>
-
-            <div class="mt-6 flex items-center justify-between">
-              <span
-                class:list={[
-                  "text-xs rounded-full px-3 py-1",
-                  workshop.status === "Disponible"
-                    ? "bg-emerald-500/15 text-emerald-300"
-                    : "bg-amber-500/15 text-amber-300",
-                ]}
-              >
-                {workshop.status}
-              </span>
-
-              <a
-                href={workshop.youtubeUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="text-white/80 hover:text-white inline-flex items-center gap-1"
-              >
-                Ver tutorial
-                <img
-                  src="https://unpkg.com/pixelarticons@1.8.1/svg/arrow-right.svg"
-                  alt="Arrow right"
-                  class="w-5 h-5 invert"
-                />
-              </a>
-            </div>
-          </article>
-        ))
-      }
+                )}
+                <p class="flex gap-2 text-xs">
+                  <span class="bg-tars-50 text-tars px-3 py-1 uppercase tracking-wide">{workshop.level}</span>
+                  <span class={`px-3 py-1 uppercase tracking-wide ${workshop.status === "Disponible" ? "bg-tars text-white" : "border border-tars-200 text-ink/60"}`}>
+                    {workshop.status}
+                  </span>
+                </p>
+                <h3 class="text-xl font-semibold leading-snug">{workshop.title}</h3>
+                <p class="text-ink/75 line-clamp-3">{workshop.description}</p>
+                <a href={workshop.youtubeUrl} target="_blank" rel="noopener noreferrer" class="text-tars text-sm underline underline-offset-4 w-fit">
+                  Ver tutorial
+                </a>
+              </article>
+            );
+          })
+        }
+      </div>
     </section>
 
-    <section class="mt-14 overflow-hidden rounded-2xl border border-emerald-400/20 bg-[radial-gradient(circle_at_top_left,_rgba(16,185,129,0.18),_transparent_35%),linear-gradient(135deg,_rgba(9,18,18,0.98),_rgba(9,9,11,0.96))]">
-      <div class="grid gap-8 p-6 sm:p-10 lg:grid-cols-[1.2fr_0.8fr] lg:items-center">
-        <div>
-          <span class="inline-flex rounded-full border border-emerald-400/20 bg-emerald-500/10 px-3 py-1 text-xs font-medium uppercase tracking-[0.2em] text-emerald-300">
-            Docentes UN Robotics
-          </span>
-          <h2 class="mt-4 max-w-3xl text-3xl font-bold text-white sm:text-4xl">
-            {teacherCommunity.title}
-          </h2>
-          <p class="mt-4 max-w-3xl text-base leading-relaxed text-white/75">
-            {teacherCommunity.description}
-          </p>
-
-          <div class="mt-6 grid gap-3 sm:grid-cols-3">
-            <div class="rounded-xl border border-white/10 bg-white/[0.04] p-4">
-              <p class="text-sm font-semibold text-white">Resuelve dudas rapidamente</p>
-              <p class="mt-2 text-sm leading-relaxed text-white/60">
-                Pregunta sobre normativa, montaje, estrategia o entregables y recibe ayuda directa de otros docentes y del equipo de TARS Robotics UPV.
-              </p>
-            </div>
-            <div class="rounded-xl border border-white/10 bg-white/[0.04] p-4">
-              <p class="text-sm font-semibold text-white">Toda la informacion en un solo lugar</p>
-              <p class="mt-2 text-sm leading-relaxed text-white/60">
-                Comparte recursos, descubre recomendaciones de TARS Robotics UPV y mantente al dia con avisos importantes de la competicion.
-              </p>
-            </div>
-            <div class="rounded-xl border border-white/10 bg-white/[0.04] p-4">
-              <p class="text-sm font-semibold text-white">Acompanamiento durante toda la competicion</p>
-              <p class="mt-2 text-sm leading-relaxed text-white/60">
-                Un canal gestionado por TARS Robotics UPV para docentes que quieren guiar mejor a su equipo en cada fase del proyecto.
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div class="rounded-2xl border border-white/10 bg-black/25 p-6 shadow-[0_20px_60px_rgba(0,0,0,0.3)]">
-          <div class="rounded-2xl border border-emerald-400/20 bg-emerald-500/10 p-5">
-            <p class="text-sm uppercase tracking-[0.22em] text-emerald-300">
-              Accede a la comunidad
-            </p>
-            <p class="mt-3 text-lg font-semibold text-white">
-              Rellena este formulario y te daremos acceso directo a la comunidad de profesores de WhatsApp
-            </p>
-            <div class="mt-3 text-sm leading-relaxed text-white/65">
-              <p class="font-medium text-white/80">Perfecto para:</p>
-              <p class="mt-2">Resolver incidencias con apoyo de TARS Robotics UPV</p>
-              <p>Consultar detalles de la competicion con nuestro equipo</p>
-              <p>Contactar directamente con soporte de TARS Robotics UPV</p>
-            </div>
-          </div>
-
-          <a
-            href={teacherCommunity.url}
-            target="_blank"
-            rel="noopener noreferrer"
-            class="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 px-4 py-3 text-center font-semibold text-[#04110d] transition-colors hover:bg-emerald-400"
-          >
-            {teacherCommunity.ctaLabel}
-            <img
-              src="https://unpkg.com/pixelarticons@1.8.1/svg/external-link.svg"
-              alt="Abrir"
-              class="h-5 w-5"
-            />
-          </a>
-        </div>
+    <section class="rounded-2xl border border-emerald-400/20 bg-[radial-gradient(circle_at_top_left,_rgba(16,185,129,0.18),_transparent_35%),linear-gradient(135deg,_rgba(9,18,18,0.98),_rgba(9,9,11,0.96))] text-white px-8 py-10 grid grid-cols-1 lg:grid-cols-[1.3fr_1fr] gap-10 items-center">
+      <div class="flex flex-col gap-4">
+        <p class="font-wide uppercase tracking-[0.25em] text-white/80 text-sm">Docentes UN Robotics</p>
+        <h2 class="font-display font-extrabold text-3xl">{teacherCommunity.title}</h2>
+        <p class="leading-relaxed text-white/85">{teacherCommunity.description}</p>
+        <ul class="mt-2 flex flex-col gap-2 text-white/85">
+          <li class="flex gap-3"><span class="mt-2 w-2 h-2 shrink-0 bg-white" />Resuelve dudas sobre normativa, montaje, estrategia o entregables.</li>
+          <li class="flex gap-3"><span class="mt-2 w-2 h-2 shrink-0 bg-white" />Recursos, recomendaciones y avisos importantes en un solo lugar.</li>
+          <li class="flex gap-3"><span class="mt-2 w-2 h-2 shrink-0 bg-white" />Acompañamiento de TARS Robotics UPV durante toda la competición.</li>
+        </ul>
+      </div>
+      <div class="rounded-2xl border border-white/10 bg-black/25 text-white p-6 flex flex-col gap-4">
+        <p class="text-tars text-xs font-semibold uppercase tracking-[0.15em]">Accede a la comunidad</p>
+        <p class="text-lg font-semibold">
+          Rellena este formulario y te daremos acceso directo a la comunidad de profesores de WhatsApp.
+        </p>
+        <BrandButton href={teacherCommunity.url} external>{teacherCommunity.ctaLabel}</BrandButton>
       </div>
     </section>
   </main>
+
   <Footer />
 </Layout>

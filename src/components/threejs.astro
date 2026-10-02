@@ -1,165 +1,410 @@
-<div
-  id="threejs-container"
-  class="w-[600px] min-h-[800px] z-0 hidden lg:block relative"
->
-</div>
+---
+// Rover TARS en 3D. Ocupa el contenedor que le de el padre.
+interface Props {
+  class?: string;
+}
+const { class: className = "" } = Astro.props;
+---
+
+<div id="rover-stage" class={`relative ${className}`}></div>
+
+<style>
+  /* La camara ve suelo hasta el borde del canvas: sin esta mascara la rejilla
+     cortaria en seco en los laterales y abajo. */
+  #rover-stage :global(canvas) {
+    -webkit-mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent),
+      linear-gradient(to bottom, #000 72%, transparent);
+    -webkit-mask-composite: source-in;
+    mask-image: linear-gradient(to right, transparent, #000 12%, #000 88%, transparent),
+      linear-gradient(to bottom, #000 72%, transparent);
+    mask-composite: intersect;
+  }
+</style>
 
 <script>
   import * as THREE from "three";
   import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
+  import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
   import { OrbitControls } from "three/examples/jsm/controls/OrbitControls.js";
+  import { RoomEnvironment } from "three/examples/jsm/environments/RoomEnvironment.js";
 
-  document.addEventListener("DOMContentLoaded", () => {
-    const container = document.getElementById("threejs-container");
+  // El GLB sale de tools/build_rover_glb.py a partir del URDF del robot. Cada
+  // junta movil es un nodo con userData { joint, type, axis, lower, upper }.
+  const MODEL_URL = "/models/rover.glb";
 
-    // Scene
-    const scene = new THREE.Scene();
+  const WHEEL_RADIUS = 0.1375; // wheel_radius del URDF
+  const CRUISE_SPEED = 0.32; // m/s
+  const GROUND_SIZE = 14;
 
-    // Camera
-    const camera = new THREE.PerspectiveCamera(
-      75,
-      container.clientWidth / container.clientHeight,
-      0.1,
-      1000
-    );
-    camera.position.z = 5;
+  // Poses del brazo resueltas con cinematica inversa sobre las longitudes del
+  // URDF (ver tools/qc_render.py): en ALCANCE la pinza queda vertical a 7 cm
+  // del suelo delante del rover.
+  const POSE_REST = {
+    arm_joint_1: 0, arm_joint_2: -1.242, arm_joint_3: 1.9, arm_joint_4: 0,
+    arm_joint_5: -0.222, arm_joint_6: 0,
+  };
+  const POSE_REACH = {
+    arm_joint_1: 0.18, arm_joint_2: -0.312, arm_joint_3: 1.404, arm_joint_4: 0,
+    arm_joint_5: 0.478, arm_joint_6: 0.6,
+  };
+  const FINGER_OPEN = 0.034;
+  const FINGER_WIDE = 0.045;
+  const FINGER_GRIP = 0.012;
 
-    // Renderer
-    const renderer = new THREE.WebGLRenderer({ alpha: true });
-    renderer.setSize(container.clientWidth, container.clientHeight);
-    container.appendChild(renderer.domElement);
+  // Linea de tiempo del ciclo (s). Las ruedas solo giran en DRIVE.
+  const T = {
+    driveEnd: 4.2,
+    lowerStart: 4.7, lowerEnd: 6.9,
+    gripEnd: 7.6,
+    raiseStart: 8.0, raiseEnd: 10.3,
+    releaseEnd: 11.0,
+    cycle: 12.6,
+  };
 
-    // Orbit Controls
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.25;
-    controls.enableZoom = false; // Disable zooming
-    controls.enablePan = false; // Disable panning
+  const smooth = (t: number) => {
+    const x = Math.min(1, Math.max(0, t));
+    return x * x * (3 - 2 * x);
+  };
+  const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+  const phase = (t: number, a: number, b: number) => smooth((t - a) / (b - a));
 
-    // Add Ambient Light
-    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5); // Soft white light
-    scene.add(ambientLight);
+  /** Velocidad del rover en el instante t del ciclo: arranca y frena suave. */
+  function speedAt(t: number) {
+    if (t >= T.driveEnd) return 0;
+    const accel = smooth(t / 0.9);
+    const brake = 1 - smooth((t - (T.driveEnd - 1.1)) / 1.1);
+    return CRUISE_SPEED * accel * brake;
+  }
 
-    // Add Directional Light
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-    directionalLight.position.set(5, 10, 7.5); // Position the light
-    scene.add(directionalLight);
+  interface Joint {
+    node: THREE.Object3D;
+    type: string;
+    axis: THREE.Vector3;
+    baseQ: THREE.Quaternion;
+    baseP: THREE.Vector3;
+    sign: number;
+  }
 
-    // Add Spotlight
-    const spotLight = new THREE.SpotLight(0x0088ff, 1.5); // Blue-ish spotlight
-    spotLight.position.set(0, 5, 5); // Position above and in front
-    spotLight.angle = Math.PI / 6; // 30 degrees
-    spotLight.penumbra = 0.3; // Soft edge
-    spotLight.decay = 2;
-    spotLight.distance = 50;
-    spotLight.castShadow = true;
-    scene.add(spotLight);
+  const tmpQ = new THREE.Quaternion();
+  const tmpV = new THREE.Vector3();
 
-    // Create a target for the spotlight
-    const spotLightTarget = new THREE.Object3D();
-    spotLightTarget.position.set(0, 0, 0); // Center of scene
-    scene.add(spotLightTarget);
-    spotLight.target = spotLightTarget;
-
-    // Fire particle streams
-    const particleCount = 30; // Reduced particle count
-    const particleGeometry = new THREE.BufferGeometry();
-    const particlePositions = new Float32Array(particleCount * 3);
-
-    for (let i = 0; i < particleCount; i++) {
-      particlePositions[i * 3] = (Math.random() - 0.5) * 0.4; // X position
-      particlePositions[i * 3 + 1] = Math.random() * 0.5; // Y position
-      particlePositions[i * 3 + 2] = (Math.random() - 0.5) * 0.4; // Z position
+  function setJoint(joint: Joint | undefined, value: number) {
+    if (!joint) return;
+    if (joint.type === "prismatic") {
+      // El eje esta en el marco de la junta: se pasa al del padre con la
+      // rotacion base antes de desplazar.
+      tmpV.copy(joint.axis).applyQuaternion(joint.baseQ);
+      joint.node.position.copy(joint.baseP).addScaledVector(tmpV, value);
+    } else {
+      tmpQ.setFromAxisAngle(joint.axis, value);
+      joint.node.quaternion.copy(joint.baseQ).multiply(tmpQ);
     }
+  }
 
-    particleGeometry.setAttribute(
-      "position",
-      new THREE.BufferAttribute(particlePositions, 3)
-    );
+  function bindRig(root: THREE.Object3D) {
+    const joints = new Map<string, Joint>();
+    root.updateMatrixWorld(true);
+    // Hacia delante es +X; el lateral izquierdo del URDF (+Y) es -Z en glTF.
+    const left = new THREE.Vector3(0, 0, -1);
+    root.traverse((node) => {
+      const data = node.userData;
+      if (!data?.joint) return;
+      const axis = new THREE.Vector3().fromArray(data.axis).normalize();
+      // Las ruedas izquierdas tienen el marco girado 180°: con el mismo giro
+      // local rodarian hacia atras. El signo se saca del eje en el mundo.
+      const worldAxis = axis.clone().transformDirection(node.matrixWorld);
+      joints.set(data.joint, {
+        node,
+        type: data.type,
+        axis,
+        baseQ: node.quaternion.clone(),
+        baseP: node.position.clone(),
+        sign: worldAxis.dot(left) >= 0 ? 1 : -1,
+      });
+    });
+    const wheels = [...joints.entries()]
+      .filter(([name]) => name.endsWith("_wheel_joint"))
+      .map(([, j]) => j);
+    return { joints, wheels };
+  }
 
-    const particleMaterial = new THREE.PointsMaterial({
-      color: 0xff4500, // Fire color
-      size: 0.2, // Bigger particle size
+  function createGround() {
+    const geometry = new THREE.PlaneGeometry(GROUND_SIZE, GROUND_SIZE);
+    geometry.rotateX(-Math.PI / 2);
+    const material = new THREE.ShaderMaterial({
       transparent: true,
-      opacity: 0.8,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false, // Prevent particles from being occluded
+      depthWrite: false,
+      uniforms: {
+        scroll: { value: 0 },
+        tiles: { value: GROUND_SIZE * 2 },
+        color: { value: new THREE.Color(0xffffff) },
+      },
+      vertexShader: `
+        varying vec2 vUv;
+        void main() {
+          vUv = uv;
+          gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+      `,
+      fragmentShader: `
+        uniform float scroll;
+        uniform float tiles;
+        uniform vec3 color;
+        varying vec2 vUv;
+        void main() {
+          vec2 cell = vUv * tiles;
+          cell.x += scroll;
+          vec2 d = abs(fract(cell - 0.5) - 0.5) / fwidth(cell);
+          float line = 1.0 - min(min(d.x, d.y), 1.0);
+          float fade = smoothstep(0.12, 0.03, distance(vUv, vec2(0.5)));
+          float alpha = line * fade * 0.28;
+          if (alpha < 0.004) discard;
+          gl_FragColor = vec4(color, alpha);
+        }
+      `,
     });
+    return new THREE.Mesh(geometry, material);
+  }
 
-    const fireStream1 = new THREE.Points(particleGeometry, particleMaterial);
-    const fireStream2 = new THREE.Points(particleGeometry, particleMaterial);
+  // Sombra de contacto falsa: sin ella, el rover flota sobre el fondo azul.
+  function createContactShadow() {
+    const canvas = document.createElement("canvas");
+    canvas.width = canvas.height = 128;
+    const ctx = canvas.getContext("2d")!;
+    const g = ctx.createRadialGradient(64, 64, 0, 64, 64, 64);
+    g.addColorStop(0, "rgba(0,0,30,0.55)");
+    g.addColorStop(1, "rgba(0,0,30,0)");
+    ctx.fillStyle = g;
+    ctx.fillRect(0, 0, 128, 128);
+    const mesh = new THREE.Mesh(
+      new THREE.PlaneGeometry(1.5, 1.2).rotateX(-Math.PI / 2),
+      new THREE.MeshBasicMaterial({
+        map: new THREE.CanvasTexture(canvas),
+        transparent: true,
+        depthWrite: false,
+      })
+    );
+    mesh.position.set(0.05, 0.002, 0);
+    return mesh;
+  }
 
-    // Position the fire streams
-    fireStream1.position.set(-0.8, -2, 0); // Adjust position of stream 1
-    fireStream2.position.set(0.8, -2.1, 0); // Adjust position of stream 2
+  // Polvo que levantan las ruedas: se emite en proporcion a la velocidad, asi
+  // que al frenar deja de salir y el que queda se posa.
+  function createDust() {
+    const COUNT = 160;
+    const positions = new Float32Array(COUNT * 3);
+    const life = new Float32Array(COUNT).fill(0);
+    const velocity = new Float32Array(COUNT * 3);
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
+    const material = new THREE.PointsMaterial({
+      color: 0xdfe6ff,
+      size: 0.028,
+      transparent: true,
+      opacity: 0.7,
+      depthWrite: false,
+    });
+    const points = new THREE.Points(geometry, material);
+    const wheelsX = [0.225, -0.225];
+    const wheelsZ = [0.36, -0.36];
+    let emitDebt = 0;
+    let next = 0;
 
-    fireStream1.rotation.set(THREE.MathUtils.degToRad(-3), 0, 0);
-    fireStream2.rotation.set(THREE.MathUtils.degToRad(3), 0, 0);
+    const step = (delta: number, speed: number) => {
+      emitDebt += speed * delta * 260;
+      while (emitDebt >= 1) {
+        emitDebt -= 1;
+        const i = next;
+        next = (next + 1) % COUNT;
+        positions[i * 3] = wheelsX[i % 2] - 0.1 + (Math.random() - 0.5) * 0.05;
+        positions[i * 3 + 1] = 0.01;
+        positions[i * 3 + 2] = wheelsZ[(i >> 1) % 2] + (Math.random() - 0.5) * 0.14;
+        velocity[i * 3] = -0.25 - Math.random() * 0.3;
+        velocity[i * 3 + 1] = 0.12 + Math.random() * 0.2;
+        velocity[i * 3 + 2] = (Math.random() - 0.5) * 0.12;
+        life[i] = 1;
+      }
+      for (let i = 0; i < COUNT; i++) {
+        if (life[i] <= 0) {
+          positions[i * 3 + 1] = -1000; // fuera del plano lejano: no se dibuja
+          continue;
+        }
+        life[i] -= delta * 0.9;
+        velocity[i * 3 + 1] -= delta * 0.35;
+        for (let k = 0; k < 3; k++) positions[i * 3 + k] += velocity[i * 3 + k] * delta;
+        // Lo que ya esta en el suelo se queda atras con el terreno.
+        positions[i * 3] -= speed * delta;
+        if (positions[i * 3 + 1] < 0) positions[i * 3 + 1] = 0;
+      }
+      geometry.attributes.position.needsUpdate = true;
+    };
+    return { points, step };
+  }
 
-    // Load GLTF model
+  function whenSized(el: HTMLElement, cb: () => void) {
+    if (el.clientWidth && el.clientHeight) return cb();
+    const ro = new ResizeObserver(() => {
+      if (el.clientWidth && el.clientHeight) {
+        ro.disconnect();
+        cb();
+      }
+    });
+    ro.observe(el);
+  }
+
+  function boot(stage: HTMLElement) {
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(32, stage.clientWidth / stage.clientHeight, 0.1, 60);
+    camera.position.set(2.55, 1.45, 2.75);
+
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(stage.clientWidth, stage.clientHeight);
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.05;
+    stage.appendChild(renderer.domElement);
+
+    // Materiales PBR metalicos: sin entorno que reflejar salen negros.
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+    pmrem.dispose();
+
+    scene.add(new THREE.AmbientLight(0xffffff, 0.3));
+    const key = new THREE.DirectionalLight(0xffffff, 2.2);
+    key.position.set(3, 5, 3);
+    scene.add(key);
+    const rim = new THREE.DirectionalLight(0x9db4ff, 1.2);
+    rim.position.set(-3, 2.5, -2.5);
+    scene.add(rim);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.target.set(0.3, 0.42, 0);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.enableZoom = false;
+    controls.enablePan = false;
+    controls.minPolarAngle = 0.6;
+    controls.maxPolarAngle = 1.45; // no dejar mirar por debajo del suelo
+    controls.update();
+
+    const ground = createGround();
+    scene.add(ground);
+    scene.add(createContactShadow());
+    const dust = createDust();
+    scene.add(dust.points);
+
+    const draco = new DRACOLoader();
+    draco.setDecoderPath("/draco/");
     const loader = new GLTFLoader();
-    loader.load("/models/model.glb", (gltf) => {
-      const model = gltf.scene;
-      scene.add(model);
+    loader.setDRACOLoader(draco);
 
-      // Scale and center the model
-      model.scale.set(0.7, 0.7, 0.7); // Increased scale value
-      const box = new THREE.Box3().setFromObject(model);
-      const center = box.getCenter(new THREE.Vector3());
-      model.position.sub(center);
-
-      // Add fire streams as children of the model
-      model.add(fireStream1);
-      model.add(fireStream2);
-
-      // Animation variables
-      let bobbingSpeed = 0.002; // Slower bobbing
-      let bobbingRange = 0.8; // More pronounced bobbing
-      let bobbingDirection = 1;
-
-      // Render loop with spinning and bobbing
-      function animate() {
-        requestAnimationFrame(animate);
-
-        // Spin the model
-        model.rotation.y += 0.01; // Adjust rotation speed
-
-        // Bob the model up and down
-        model.position.y += bobbingSpeed * bobbingDirection;
-        if (
-          model.position.y > bobbingRange ||
-          model.position.y < -bobbingRange
-        ) {
-          bobbingDirection *= -1; // Reverse direction
-        }
-
-        // Update particles and controls
-        updateParticles();
-        controls.update();
-
-        // Render the scene
-        renderer.render(scene, camera);
-      }
-      animate();
-    });
-
-    // Update particles to simulate fire movement
-    function updateParticles() {
-      const positions = particleGeometry.attributes.position.array;
-      for (let i = 0; i < particleCount; i++) {
-        positions[i * 3 + 1] -= 0.02; // Move particles downward
-        if (positions[i * 3 + 1] < -0.1) {
-          positions[i * 3 + 1] = 0.5; // Reset particle position to the top
-        }
-      }
-      particleGeometry.attributes.position.needsUpdate = true;
-    }
-
-    // Resize handling
-    window.addEventListener("resize", () => {
-      camera.aspect = container.clientWidth / container.clientHeight;
+    const onResize = () => {
+      if (!stage.clientWidth || !stage.clientHeight) return;
+      camera.aspect = stage.clientWidth / stage.clientHeight;
       camera.updateProjectionMatrix();
-      renderer.setSize(container.clientWidth, container.clientHeight);
-    });
-  });
+      renderer.setSize(stage.clientWidth, stage.clientHeight);
+    };
+    window.addEventListener("resize", onResize);
+
+    loader.load(
+      MODEL_URL,
+      (gltf) => {
+        scene.add(gltf.scene);
+        const { joints, wheels } = bindRig(gltf.scene);
+        const j = (name: string) => joints.get(name);
+        for (const name of Object.keys(POSE_REST)) {
+          if (!joints.has(name)) console.warn(`[rover] falta la junta ${name}`);
+        }
+
+        const applyArm = (from: Record<string, number>, to: Record<string, number>, t: number) => {
+          for (const name of Object.keys(from)) setJoint(j(name), lerp(from[name], to[name], t));
+        };
+        const setFingers = (v: number) => {
+          setJoint(j("arm_finger_left_joint"), v);
+          setJoint(j("arm_finger_right_joint"), v);
+        };
+
+        applyArm(POSE_REST, POSE_REST, 0);
+        setFingers(FINGER_OPEN);
+
+        if (reducedMotion) {
+          renderer.render(scene, camera);
+          controls.addEventListener("change", () => renderer.render(scene, camera));
+          return;
+        }
+
+        const clock = new THREE.Clock();
+        let time = 0;
+        let distance = 0;
+        let running = true;
+        let frame = 0;
+
+        function tick() {
+          if (!running) return;
+          frame = requestAnimationFrame(tick);
+          const delta = Math.min(clock.getDelta(), 0.1);
+          time += delta;
+          const t = time % T.cycle;
+
+          const speed = speedAt(t);
+          distance += speed * delta;
+          const wheelAngle = distance / WHEEL_RADIUS;
+          for (const wheel of wheels) setJoint(wheel, wheel.sign * wheelAngle);
+
+          // Los balancines acompanan el terreno solo mientras se mueve.
+          const rock = (speed / CRUISE_SPEED) * 0.025;
+          setJoint(j("rocker_l_joint"), rock * Math.sin(distance * 9));
+          setJoint(j("rocker_r_joint"), rock * Math.sin(distance * 9 + 1.7));
+
+          // Brazo: baja, cierra la pinza, sube y suelta.
+          if (t < T.lowerStart) {
+            applyArm(POSE_REST, POSE_REST, 0);
+            setFingers(FINGER_OPEN);
+          } else if (t < T.lowerEnd) {
+            const k = phase(t, T.lowerStart, T.lowerEnd);
+            applyArm(POSE_REST, POSE_REACH, k);
+            setFingers(lerp(FINGER_OPEN, FINGER_WIDE, k));
+          } else if (t < T.raiseStart) {
+            applyArm(POSE_REACH, POSE_REACH, 0);
+            setFingers(lerp(FINGER_WIDE, FINGER_GRIP, phase(t, T.lowerEnd, T.gripEnd)));
+          } else if (t < T.raiseEnd) {
+            applyArm(POSE_REACH, POSE_REST, phase(t, T.raiseStart, T.raiseEnd));
+            setFingers(FINGER_GRIP);
+          } else {
+            applyArm(POSE_REST, POSE_REST, 0);
+            setFingers(lerp(FINGER_GRIP, FINGER_OPEN, phase(t, T.raiseEnd, T.releaseEnd)));
+          }
+
+          ground.material.uniforms.scroll.value = distance * 2;
+          dust.step(delta, speed);
+          controls.update();
+          renderer.render(scene, camera);
+        }
+
+        // Pausa fuera de pantalla: no gastar GPU con el hero fuera de vista.
+        new IntersectionObserver(([entry]) => {
+          running = entry.isIntersecting;
+          cancelAnimationFrame(frame);
+          if (running) {
+            clock.getDelta();
+            tick();
+          }
+        }).observe(stage);
+      },
+      undefined,
+      (error) => console.error(`[rover] no se pudo cargar ${MODEL_URL}`, error)
+    );
+  }
+
+  function start() {
+    const stage = document.getElementById("rover-stage");
+    if (stage) whenSized(stage, () => boot(stage));
+  }
+
+  // Modulo diferido: puede ejecutarse ya pasado el DOMContentLoaded.
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start);
+  else start();
 </script>

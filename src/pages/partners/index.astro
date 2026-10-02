@@ -2,19 +2,12 @@
 import Layout from "../../layouts/Layout.astro";
 import Header from "../../components/Header.astro";
 import Footer from "../../components/Footer.astro";
-import HeadTitle from "../../components/HeadTitle.astro";
-import SponsorsData from "../../../public/json/sponsors.json";
+import PageHero from "../../components/brand/PageHero.astro";
+import SectionTitle from "../../components/brand/SectionTitle.astro";
+import SponsorTiers from "../../components/brand/SponsorTiers.astro";
+import BrandButton from "../../components/brand/BrandButton.astro";
+import { enlace_ser_patrocinador, enlace_dossier_patrocinio } from "../../lib/constants";
 import EntitiesData from "../../../public/json/entities.json";
-import Button from "../../components/Button.astro";
-import { mail_llegada_correos_patrocinios } from "../../lib/constants";
-
-interface Sponsor {
-  name: string;
-  logo: string;
-  url?: string;
-  tier?: string;
-  description?: string;
-}
 
 interface Entity {
   name: string;
@@ -24,178 +17,70 @@ interface Entity {
   url?: string;
 }
 
-const sponsors = (SponsorsData.sponsors || []) as Sponsor[];
 const entities = (EntitiesData.entities || []) as Entity[];
-const tiers = [
-  { key: "SOCIO ESTRATEGICO", label: "Socio estratégico" },
-  { key: "PATROCINADOR OFICIAL", label: "Patrocinador oficial" },
-  { key: "COLABORADOR", label: "Colaborador" },
-];
-const sponsorMailto = `mailto:${mail_llegada_correos_patrocinios}?subject=Queremos%20formar%20parte%20de%20la%20familia%20TARS%20Robotics%20UPV`;
 ---
 
-<Layout title="Partners | TARS Innovación y excelencia en robótica competitiva">
+<Layout title="Partners | TARS Robotics UPV">
   <Header />
-  <HeadTitle
-    icon="/img/money.svg"
-    text="Partners"
-    description="Primero patrocinadores y después entidades, en una única página."
-  />
+  <PageHero
+    eyebrow="Quiénes nos apoyan"
+    title="Partners"
+    description="Las empresas e instituciones que impulsan TARS."
+  >
+    <nav class="mt-4 flex flex-wrap gap-3 text-sm">
+      <a href="#patrocinadores" class="px-4 py-2 border border-white/60 hover:bg-white hover:text-black transition-colors">Patrocinadores</a>
+      <a href="#entidades" class="px-4 py-2 border border-white/60 hover:bg-white hover:text-black transition-colors">Entidades</a>
+    </nav>
+  </PageHero>
 
-  <main class="max-w-[1400px] mx-auto px-4 sm:px-10 pb-16">
-    <section id="patrocinadores" class="mb-14 flex flex-col gap-4 scroll-mt-28">
-      <h2 class="text-3xl font-bold text-white">Patrocinadores</h2>
-      <p class="text-white/70 max-w-3xl">
-        Empresas y colaboradores que apoyan nuestras ideas, prototipos y competiciones.
+  <main class="mx-auto max-w-6xl px-6 flex flex-col gap-28 pt-20">
+    <section>
+      <SectionTitle id="patrocinadores" eyebrow="Temporada 2026-27" title="Patrocinadores" />
+      <p class="text-lg leading-relaxed max-w-3xl text-ink/85 -mt-2 mb-10">
+        Las empresas e instituciones que apoyan nuestras ideas, prototipos y competiciones.
       </p>
-      <span class="w-fit">
-        <Button
-          icon="/img/money.svg"
-          href={sponsorMailto}
-          text="Ser patrocinador"
-        />
-      </span>
+      <div class="-mt-4 mb-10 flex flex-wrap gap-3">
+        <BrandButton href={enlace_ser_patrocinador || "#patrocinadores"} variant="light">Ser patrocinador</BrandButton>
+        <BrandButton href={enlace_dossier_patrocinio || "#patrocinadores"}>Consigue el dossier</BrandButton>
+      </div>
+      <SponsorTiers detailed />
     </section>
 
-    <div class="flex flex-col gap-10">
-      {
-        tiers.map((tier) => {
-          const tierSponsors = sponsors.filter(
-            (sponsor) => sponsor.tier === tier.key
-          );
-          if (tierSponsors.length === 0) return null;
-
-          return (
-            <section class="flex flex-col gap-4">
-              <div class="flex items-center gap-3">
-                <div class="w-2 h-8 rounded-full bg-blue-500/70"></div>
-                <h3 class="text-xl font-semibold text-white/80 tracking-wide uppercase">
-                  {tier.label}
-                </h3>
-              </div>
-
-              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {
-                  tierSponsors.map((sponsor) => (
-                    <div class="group relative p-6 rounded-xl bg-[#181818] border border-zinc-800/40 hover:border-blue-500/40 transition-all hover:-translate-y-1 flex flex-col h-[280px]">
-                      <div class="absolute inset-0 rounded-xl bg-gradient-to-br from-blue-500/5 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-                      <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                        <div class="flex min-w-0 items-start gap-3">
-                          <div class="flex h-20 w-28 shrink-0 items-center justify-center rounded-lg border border-white/5 bg-white/5 p-3">
-                            <img
-                              src={sponsor.logo}
-                              alt={sponsor.name}
-                              class="max-h-12 max-w-full object-contain"
-                              loading="lazy"
-                            />
-                          </div>
-                          <div class="min-w-0 flex-1">
-                            <h4 class="text-lg font-semibold text-white break-words">
-                              {sponsor.name}
-                            </h4>
-                            <p class="text-xs text-white/50">{tier.label}</p>
-                          </div>
-                        </div>
-                        {
-                          sponsor.url && (
-                            <a
-                              href={sponsor.url}
-                              target="_blank"
-                              rel="noreferrer"
-                              class="self-start text-xs text-blue-400 hover:text-blue-300 underline sm:shrink-0"
-                            >
-                              Web
-                            </a>
-                          )
-                        }
-                      </div>
-                      {
-                        sponsor.description && (
-                          <p class="mt-4 text-white/70 text-sm leading-relaxed line-clamp-4">
-                            {sponsor.description}
-                          </p>
-                        )
-                      }
-                      <div class="mt-auto pt-4">
-                        <span class="text-xs text-white/40">Partner TARS</span>
-                      </div>
-                    </div>
-                  ))
-                }
-              </div>
-            </section>
-          );
-        })
-      }
-    </div>
-
-    <section id="entidades" class="mt-20 mb-8 flex flex-col gap-3 scroll-mt-28">
-      <h2 class="text-3xl font-bold text-white">Entidades</h2>
-      <p class="text-white/70 max-w-3xl">
+    <section>
+      <SectionTitle id="entidades" eyebrow="Colaboraciones institucionales" title="Entidades" />
+      <p class="text-lg leading-relaxed max-w-3xl text-ink/85 -mt-2 mb-10">
         Organizaciones e instituciones que colaboran con TARS en iniciativas estratégicas.
       </p>
-    </section>
-
-    <section class="grid grid-cols-1 gap-6">
-      {
-        entities.map((entity) => (
-          <details class="entity-card rounded-xl border border-zinc-800/40 bg-[#181818] p-6 transition-all">
-            <summary class="list-none cursor-pointer">
-              <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-5">
-                <div>
-                  <h2 class="text-2xl font-bold text-white">{entity.name}</h2>
-                  <p class="mt-2 text-sm text-white/60">Pulsa para desplegar información</p>
+      <div class="flex flex-col gap-6">
+        {
+          entities.map((entity) => (
+            <details class="entity rounded-xl bg-[#181818] border border-zinc-800/30 open:border-blue-500/40 transition-colors">
+              <summary class="list-none cursor-pointer px-6 py-5 flex items-center justify-between gap-5">
+                <div class="flex items-center gap-5">
+                  {entity.logo && <img src={entity.logo} alt="" class="h-12 w-auto max-w-[160px] object-contain" loading="lazy" />}
+                  <h3 class="text-xl font-semibold">{entity.name}</h3>
                 </div>
-                <div class="flex items-center gap-4">
-                  {
-                    entity.logo && (
-                      <img
-                        src={entity.logo}
-                        alt={`Logo ${entity.name}`}
-                        class="w-full max-w-[220px] h-auto object-contain rounded-md border border-zinc-700/40 bg-[#121212] p-2"
-                      />
-                    )
-                  }
-                  <span class="chevron text-white/70 text-xl">+</span>
+                <span class="chevron text-tars text-3xl leading-none">+</span>
+              </summary>
+              <div class="px-6 pb-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="border-l-4 border-tars pl-5">
+                  <h4 class="text-tars text-xs uppercase tracking-wide">Qué hacen</h4>
+                  <p class="mt-2 leading-relaxed text-ink/80">{entity.whatTheyDo || "Información no disponible."}</p>
                 </div>
+                <div class="border-l-4 border-tars pl-5">
+                  <h4 class="text-tars text-xs uppercase tracking-wide">Cómo colaboramos</h4>
+                  <p class="mt-2 leading-relaxed text-ink/80">{entity.collaboration || "Información no disponible."}</p>
+                </div>
+                {entity.url && (
+                  <a href={entity.url} target="_blank" rel="noopener noreferrer" class="text-tars underline underline-offset-4 w-fit">
+                    Visitar sitio
+                  </a>
+                )}
               </div>
-            </summary>
-            <div class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div class="rounded-lg border border-zinc-800/60 bg-black/20 p-4">
-                <h3 class="text-blue-400 text-sm uppercase tracking-wide">
-                  Qué hacen
-                </h3>
-                <p class="mt-2 text-white/75 text-sm leading-relaxed">
-                  {entity.whatTheyDo || "Información no disponible."}
-                </p>
-              </div>
-              <div class="rounded-lg border border-zinc-800/60 bg-black/20 p-4">
-                <h3 class="text-blue-400 text-sm uppercase tracking-wide">
-                  Cómo colaboramos
-                </h3>
-                <p class="mt-2 text-white/75 text-sm leading-relaxed">
-                  {entity.collaboration || "Información no disponible."}
-                </p>
-              </div>
-            </div>
-            {entity.url && (
-              <a
-                href={entity.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                class="mt-5 inline-flex items-center gap-2 text-blue-400 hover:text-blue-300"
-              >
-                Visitar sitio
-                <img
-                  src="https://unpkg.com/pixelarticons@1.8.1/svg/external-link.svg"
-                  alt="Abrir"
-                  class="w-5 h-5 invert"
-                />
-              </a>
-            )}
-          </details>
-        ))
-      }
+            </details>
+          ))
+        }
+      </div>
     </section>
   </main>
 
@@ -203,20 +88,13 @@ const sponsorMailto = `mailto:${mail_llegada_correos_patrocinios}?subject=Querem
 </Layout>
 
 <style>
-  .entity-card summary::-webkit-details-marker {
+  .entity summary::-webkit-details-marker {
     display: none;
   }
-
-  .entity-card[open] {
-    border-color: rgba(59, 130, 246, 0.35);
-    background: #1b1b1b;
-  }
-
-  .entity-card[open] .chevron {
-    transform: rotate(45deg);
-  }
-
   .chevron {
     transition: transform 0.2s ease;
+  }
+  .entity[open] .chevron {
+    transform: rotate(45deg);
   }
 </style>

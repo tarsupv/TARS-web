@@ -1,189 +1,95 @@
 ---
-import { contentfulClient } from "../../lib/contentful";
-import type { work } from "../../lib/contentful";
+import { getLatestPosts } from "../../lib/contentful";
 import Layout from "../../layouts/Layout.astro";
 import Header from "../../components/Header.astro";
 import Footer from "../../components/Footer.astro";
-import HeadTitle from "../../components/HeadTitle.astro";
+import PageHero from "../../components/brand/PageHero.astro";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
-const entries = await contentfulClient.getEntries<work>({
-  content_type: "blogTars",
-  order: ["-fields.date"], // Sort by date, newest first
-  limit: 12, // Limit to 12 posts
-});
-
-const posts = entries.items.map((item) => {
-  const { title, slug, date, headerImg, description, category, readTime } =
-    item.fields;
+const posts = (await getLatestPosts(12)).map((item) => {
+  const { title, slug, date, headerImg, description, category, readTime } = item.fields;
   return {
     title,
     slug,
     date: date ? new Date(date) : new Date(),
-    headerImg,
+    image: headerImg && "fields" in headerImg ? headerImg.fields.file?.url : undefined,
     description,
     category: category || "Noticias",
     readTime: readTime || "5",
   };
 });
 
-// Featured post is the first post
-const featuredPost = posts.length > 0 ? posts[0] : null;
-// Regular posts are all posts except the featured one
-const regularPosts = posts.length > 1 ? posts.slice(1) : [];
+const [featured, ...rest] = posts;
 ---
 
-<Layout title="Noticias | TARS Innovación y excelencia en robótica competitiva">
-  <Header isWork />
-  <HeadTitle
-    icon="/img/news.svg"
-    text="Noticias"
-    description="Consulta las noticias y avances más recientes del equipo!"
+<Layout title="Noticias | TARS Robotics UPV">
+  <Header />
+  <PageHero
+    eyebrow="Actualidad"
+    title="Noticias"
+    description="Las noticias y avances más recientes del equipo."
   />
 
-  <main class="-translate-y-[30px] flex flex-col items-center justify-center relative">
-    <section class="max-w-[1400px] w-[95%] relative">
-      <!-- Featured Post -->
-      {
-        featuredPost && (
-          <div class="w-full mb-16">
-            <a
-              href={`work/${featuredPost.slug}`}
-              class="group grid lg:grid-cols-2 gap-6 bg-gradient-to-br from-[#202020] to-[#181818] rounded-xl overflow-hidden shadow-xl hover:shadow-2xl transition-all duration-300 border border-zinc-800/30"
-            >
-              <div class="relative overflow-hidden h-[350px] lg:h-auto">
-                <div class="absolute top-4 left-4 z-10 bg-gradient-to-r from-orange-500 to-red-500 text-white text-sm font-medium px-3 py-1 rounded-full">
-                  Destacado
-                </div>
-                <img
-                  src={
-                    featuredPost.headerImg && "fields" in featuredPost.headerImg
-                      ? featuredPost.headerImg.fields.file.url
-                      : ""
-                  }
-                  alt={featuredPost.title}
-                  class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                />
-              </div>
-              <div class="p-6 flex flex-col justify-center">
-                <div class="flex items-center space-x-3 mb-3">
-                  <span class="text-blue-500 text-sm font-medium">
-                    {featuredPost.category}
-                  </span>
-                  <span class="w-1 h-1 rounded-full bg-gray-400" />
-                  <span class="text-gray-400 text-sm">
-                    {format(featuredPost.date, "d 'de' MMMM, yyyy", {
-                      locale: es,
-                    })}
-                  </span>
-                  <span class="w-1 h-1 rounded-full bg-gray-400" />
-                  <span class="text-gray-400 text-sm">
-                    {featuredPost.readTime} min de lectura
-                  </span>
-                </div>
-                <h2 class="text-3xl md:text-4xl font-bold text-white mb-4 group-hover:text-blue-500 transition-colors">
-                  {featuredPost.title}
-                </h2>
-                <p class="text-gray-300 text-lg mb-6 line-clamp-3">
-                  {featuredPost.description ||
-                    "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec dui nec odio."}
-                </p>
-                <div class="mt-auto opacity-60 hover:opacity-100 transition-opacity duration-300">
-                  <span class="inline-flex items-center text-white font-medium group-hover:translate-x-1 transition-transform">
-                    Leer más
-                    <img 
-                      src="https://unpkg.com/pixelarticons@1.8.1/svg/arrow-right.svg"
-                      alt="Arrow right"
-                      class="w-6 h-6 invert ml-1 transition-transform duration-300 group-hover:translate-x-1"
-                    />
-                  </span>
-                </div>
-              </div>
-            </a>
+  <main class="mx-auto max-w-6xl px-6 pt-20">
+    {
+      featured && (
+        <a href={`/work/${featured.slug}`} class="group grid lg:grid-cols-2 gap-8 lg:gap-12 items-center rounded-xl bg-[#181818] border border-zinc-800/30 p-6 mb-16">
+          <div class="overflow-hidden aspect-[16/10] bg-tars-50">
+            {featured.image && (
+              <img src={featured.image} alt="" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+            )}
           </div>
-        )
-      }
-
-      <!-- Regular Posts Grid -->
-      <div class="w-full">
-        <div
-          class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8"
-        >
-          {
-            regularPosts.map((post) => (
-              <a
-                href={`work/${post.slug}`}
-                class="group flex flex-col rounded-xl bg-[#181818] hover:-translate-y-2 hover:shadow-lg transition-all duration-300 overflow-hidden border border-zinc-800/30"
-              >
-                <div class="relative">
-                  <div class="absolute top-3 left-3 z-10 bg-black/70 backdrop-blur-sm text-white text-xs font-medium px-2 py-1 rounded-md">
-                    {post.category}
-                  </div>
-                  <img
-                    src={
-                      post.headerImg && "fields" in post.headerImg
-                        ? post.headerImg.fields.file.url
-                        : ""
-                    }
-                    alt={post.title}
-                    class="w-full h-56 object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                </div>
-                <div class="p-5 flex-grow flex flex-col">
-                  <div class="text-gray-400 text-xs flex items-center mb-2">
-                    <span>
-                      {format(post.date, "d MMM, yyyy", { locale: es })}
-                    </span>
-                    <span class="mx-2">•</span>
-                    <span>{post.readTime} min</span>
-                  </div>
-                  <h2 class="font-bold text-xl text-white mb-2 group-hover:text-blue-500 transition-colors line-clamp-2">
-                    {post.title}
-                  </h2>
-                  <p class="text-gray-300 text-sm mb-4 line-clamp-3">
-                    {post.description ||
-                      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec dui nec odio."}
-                  </p>
-                  <div class="mt-auto pt-3 border-t border-zinc-700/50">
-                    <span class="text-sm text-white font-medium flex items-center group-hover:translate-x-1 transition-transform">
-                      Leer artículo
-                      <img 
-                      src="https://unpkg.com/pixelarticons@1.8.1/svg/arrow-right.svg"
-                      alt="Arrow right"
-                      class="w-6 h-6 invert ml-1 transition-transform duration-300 group-hover:translate-x-1"
-                    />
-                    </span>
-                  </div>
-                </div>
-              </a>
-            ))
-          }
-        </div>
-      </div>
-
-      <!-- No posts message -->
-      {
-        posts.length === 0 && (
-          <div class="w-full py-16 text-center">
-            <h3 class="text-2xl font-bold text-white mb-4">
-              Próximamente nuevas publicaciones
-            </h3>
-            <p class="text-gray-400">
-              Estamos trabajando en crear contenido interesante para ti.
+          <div class="flex flex-col gap-4">
+            <p class="text-xs uppercase tracking-[0.15em] text-tars">
+              Destacado · {featured.category} · {format(featured.date, "d 'de' MMMM, yyyy", { locale: es })} · {featured.readTime} min
             </p>
+            <h2 class="font-display font-extrabold text-3xl md:text-4xl leading-tight group-hover:text-tars transition-colors">
+              {featured.title}
+            </h2>
+            {featured.description && <p class="text-lg text-ink/75 line-clamp-3">{featured.description}</p>}
+            <span class="inline-flex items-center gap-2 text-tars font-medium">
+              Leer artículo
+              <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                <path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="square" />
+              </svg>
+            </span>
           </div>
-        )
-      }
-    </section>
+        </a>
+      )
+    }
+
+    {
+      rest.length > 0 && (
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
+          {rest.map((post) => (
+            <a href={`/work/${post.slug}`} class="group flex flex-col gap-4">
+              <div class="overflow-hidden aspect-[4/3] bg-tars-50">
+                {post.image && (
+                  <img src={post.image} alt="" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" />
+                )}
+              </div>
+              <p class="text-xs uppercase tracking-wide text-tars">
+                {post.category} · {format(post.date, "d MMM yyyy", { locale: es })} · {post.readTime} min
+              </p>
+              <h3 class="text-xl font-semibold leading-snug group-hover:text-tars transition-colors line-clamp-2">{post.title}</h3>
+              {post.description && <p class="text-ink/75 text-sm line-clamp-3">{post.description}</p>}
+            </a>
+          ))}
+        </div>
+      )
+    }
+
+    {
+      posts.length === 0 && (
+        <div class="py-20 text-center flex flex-col items-center gap-4">
+          <img src="/img/brand/mascota-circulo.png" alt="" class="h-20 w-auto" />
+          <h2 class="font-display font-extrabold uppercase text-2xl text-tars">Próximamente nuevas publicaciones</h2>
+          <p class="text-ink/70">Estamos preparando contenido nuevo sobre el equipo y nuestros robots.</p>
+        </div>
+      )
+    }
   </main>
+
   <Footer />
 </Layout>
-
-<style>
-  .post:hover {
-    box-shadow:
-      0 20px 25px -5px rgba(0, 0, 0, 0.1),
-      0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  }
-</style>

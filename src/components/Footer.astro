@@ -1,218 +1,112 @@
 ---
-import Button from "./Button.astro";
+import BrandButton from "./brand/BrandButton.astro";
+import { footerSponsors } from "../lib/sponsors";
 import { mail_llegada_correos_patrocinios } from "../lib/constants";
-import SponsorsData from "../../public/json/sponsors.json";
 
-let currentYear = new Date().getFullYear();
+const currentYear = new Date().getFullYear();
+const sponsorMailto = `mailto:${mail_llegada_correos_patrocinios}?subject=${encodeURIComponent(
+  "Queremos formar parte de la familia TARS Robotics UPV"
+)}`;
 
-const sponsorLogos = (SponsorsData.sponsors || []).map((sponsor) => ({
-  name: sponsor.name,
-  logo: sponsor.logo,
-}));
+// El carrusel se desplaza la mitad de su ancho y vuelve a empezar, asi que cada
+// mitad tiene que llenar la pantalla aunque haya pocos patrocinadores.
+const sponsors = footerSponsors();
+const repeats = sponsors.length ? Math.max(1, Math.ceil(8 / sponsors.length)) : 0;
+const strip = Array.from({ length: repeats }, () => sponsors).flat();
+const duration = Math.max(20, strip.length * 4);
+
+const socials = [
+  { href: "https://www.instagram.com/tars.upv", icon: "/img/instagram.svg", label: "Instagram" },
+  { href: "https://www.tiktok.com/@tars.upv", icon: "/img/tiktok.svg", label: "TikTok" },
+  { href: "https://www.linkedin.com/company/105258034/", icon: "/img/linkedin.svg", label: "LinkedIn" },
+  { href: "https://www.youtube.com/@TARSupv?sub_confirmation=1", icon: "/img/youtube.svg", label: "YouTube" },
+  { href: "https://x.com/Tars_UPV", icon: "/img/twitter.svg", label: "X" },
+];
 ---
 
-<div
-  class="py-12 mt-28 px-6 md:px-36 w-screen bg-gradient-to-tr from-[#1c1832] to-[#481b72] text-white flex flex-col gap-10 z-50 relative"
->
-  <div class="w-full grid grid-cols-1 lg:grid-cols-2 gap-8 items-end z-10">
-    <div class="flex flex-col gap-3">
-      <div class="flex flex-row items-center gap-6">
-        <div class="flex flex-row items-center gap-3">
-          <img src="/img/logo-isotype.png" id="isotype" class="w-14 h-14" />
-          <img src="/img/logo-wordmark.png" id="wordmark" class="h-6 w-28" />
-        </div>
-        <div class="w-[2px] h-10 bg-white/30"></div>
-        <img
-          src="/img/logo-geupv.png"
-          alt="Logo Generacion Espontanea UPV"
-          class="h-16 invert brightness-200"
-        />
-      </div>
-    </div>
-
-    <div class="flex flex-col gap-4 lg:items-end">
-      <h3 class="text-xl font-medium lg:text-right">
-        Innovacion y excelencia en robotica competitiva
-      </h3>
-      <div class="flex flex-row gap-3 lg:justify-end">
-        <Button icon="/img/user.svg" href="https://forms.gle/UZZHY9VspfVWfafUA" text="Unete" white />
-        <Button
-          icon="/img/money.svg"
-          href={`mailto:${mail_llegada_correos_patrocinios}?subject=Queremos%20formar%20parte%20de%20la%20familia%20TARS%20Robotics%20UPV`}
-          text="Patrocinar"
-        />
-      </div>
-    </div>
-  </div>
-
-  <div class="logo-strip relative overflow-hidden rounded-xl border border-white/10 bg-black/30 px-4 py-3 z-10">
-    <div class="absolute left-0 top-0 h-full w-10 bg-gradient-to-r from-[#2a1d47] to-transparent z-10"></div>
-    <div class="absolute right-0 top-0 h-full w-10 bg-gradient-to-l from-[#2a1d47] to-transparent z-10"></div>
-    <div class="logo-strip-track" data-footer-track>
-      <div class="logo-strip-seq" data-footer-seq>
-        {
-          sponsorLogos.map((sponsor) => (
-            <a
-              href="/partners#patrocinadores"
-              class="flex items-center justify-center rounded-lg border border-white/10 bg-white/[0.02] px-4 py-2 opacity-70 hover:opacity-100 transition-opacity"
-              aria-label={sponsor.name}
-            >
-              <img
-                src={sponsor.logo}
-                alt={sponsor.name}
-                class="h-12 max-w-[160px] object-contain"
-                loading="lazy"
-              />
-            </a>
-          ))
-        }
-      </div>
-      <div class="logo-strip-seq" data-footer-seq aria-hidden="true">
-        {
-          sponsorLogos.map((sponsor) => (
-            <a
-              href="/partners#patrocinadores"
-              class="flex items-center justify-center rounded-lg border border-white/10 bg-white/[0.02] px-4 py-2 opacity-70 hover:opacity-100 transition-opacity"
-              aria-label={sponsor.name}
-            >
-              <img
-                src={sponsor.logo}
-                alt={sponsor.name}
-                class="h-12 max-w-[160px] object-contain"
-                loading="lazy"
-              />
-            </a>
-          ))
-        }
-      </div>
-    </div>
-  </div>
-
-  <div class="w-full flex flex-col md:flex-row md:items-center md:justify-between gap-4 z-10">
-    <p>&copy; {currentYear} TARS UPV. Todos los derechos reservados.</p>
-    <div class="invert flex flex-row items-center gap-6">
-      <a
-        href="https://x.com/Tars_UPV"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="opacity-60 hover:opacity-100"
-      >
-        <img src="/img/twitter.svg" alt="Twitter" class="w-6 h-6" />
-      </a>
-      <a
-        href="https://www.linkedin.com/company/105258034/admin/dashboard/"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="opacity-60 hover:opacity-100"
-      >
-        <img src="/img/linkedin.svg" alt="LinkedIn" class="w-8 h-8" />
-      </a>
-      <a
-        href="https://www.instagram.com/tars.upv"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="opacity-60 hover:opacity-100"
-      >
-        <img src="/img/instagram.svg" alt="Instagram" class="w-6 h-6" />
-      </a>
-      <a
-        href="https://www.youtube.com/@TARSupv?sub_confirmation=1"
-        target="_blank"
-        rel="noopener noreferrer"
-        class="opacity-60 hover:opacity-100"
-      >
-        <img src="/img/youtube.svg" alt="YouTube" class="w-6 h-6" />
-      </a>
-    </div>
-  </div>
-
+<footer class="relative mt-28 overflow-hidden bg-gradient-to-tr from-[#1c1832] to-[#481b72] text-white">
   <div class="scrolling-text-container" aria-hidden="true">
     <div class="scrolling-text">Innovacion y excelencia en robotica competitiva</div>
-    <div class="scrolling-text ml-20">Innovacion y excelencia en robotica competitiva</div>
   </div>
-</div>
 
-<script is:inline>
-  const footerTracks = document.querySelectorAll("[data-footer-track]");
-  const fillFooterTicker = (track) => {
-    const ticker = track.closest(".logo-strip");
-    if (!ticker) return;
+  <div class="relative z-10 mx-auto max-w-[1400px] px-6 md:px-16 py-12 flex flex-col gap-10">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-end">
+      <div class="flex flex-row flex-wrap items-center gap-6">
+        <div class="flex flex-row items-center gap-3">
+          <img src="/img/brand/mascota-circulo.png" alt="" class="h-14 w-auto" />
+          <img src="/img/brand/wordmark-tars-robotics.png" alt="TARS Robotics" class="h-10 w-auto" />
+        </div>
+        <div class="w-[2px] h-10 bg-white/30"></div>
+        <img src="/img/brand/logo-upv-blanco.png" alt="Universitat Politècnica de València" class="h-10 w-auto" />
+        <img src="/img/brand/logo-generacion-espontanea-blanco.png" alt="Generación Espontánea · UPV Design Factory" class="h-10 w-auto" />
+      </div>
+      <div class="flex flex-col gap-4 lg:items-end">
+        <h3 class="text-xl font-medium lg:text-right">Innovación y excelencia en robótica competitiva</h3>
+        <div class="flex flex-row gap-3 lg:justify-end">
+          <BrandButton href="https://forms.gle/UZZHY9VspfVWfafUA" variant="light" external>Únete</BrandButton>
+          <BrandButton href={sponsorMailto}>Patrocinar</BrandButton>
+        </div>
+      </div>
+    </div>
 
-    const seqs = track.querySelectorAll("[data-footer-seq]");
-    if (seqs.length < 2) return;
-
-    const baseHtml = seqs[0].innerHTML;
-    seqs.forEach((seq) => {
-      seq.innerHTML = baseHtml;
-    });
-
-    const baseItems = Array.from(seqs[0].children);
-    if (baseItems.length === 0) return;
-
-    const minWidth = ticker.clientWidth + 1;
-    while (seqs[0].scrollWidth < minWidth) {
-      baseItems.forEach((item) => {
-        seqs[0].appendChild(item.cloneNode(true));
-        seqs[1].appendChild(item.cloneNode(true));
-      });
+    {
+      sponsors.length > 0 && (
+        <div class="sponsor-marquee relative overflow-hidden rounded-xl border border-white/10 bg-black/30 py-4" aria-label="Patrocinadores">
+          <div class="sponsor-track flex w-max items-center" style={`--duration:${duration}s`}>
+            {[0, 1].map((half) => (
+              <div class="flex items-center gap-4 pr-4" aria-hidden={half === 1 ? "true" : undefined}>
+                {strip.map((s) => (
+                  <a
+                    href={s.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title={s.name}
+                    tabindex={half === 1 ? -1 : undefined}
+                    class="flex items-center justify-center rounded-lg bg-white px-4 py-2 opacity-80 hover:opacity-100 transition-opacity"
+                  >
+                    <img src={s.logo} alt={half === 1 ? "" : s.name} style={`height:${s.logoHeight}px`} class="w-auto max-w-[220px] object-contain" loading="lazy" />
+                  </a>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+      )
     }
 
-    track.style.setProperty("--footer-marquee-distance", `${seqs[0].scrollWidth}px`);
-  };
-
-  const refreshFooterTicker = () => {
-    footerTracks.forEach((track) => fillFooterTicker(track));
-  };
-
-  window.addEventListener("load", refreshFooterTicker);
-  window.addEventListener("resize", () => {
-    window.clearTimeout(window.__footerTickerResize);
-    window.__footerTickerResize = window.setTimeout(refreshFooterTicker, 150);
-  });
-</script>
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <p>&copy; {currentYear} TARS UPV. Todos los derechos reservados.</p>
+      <div class="invert flex flex-row items-center gap-6">
+        {socials.map((s) => (
+          <a href={s.href} target="_blank" rel="noopener noreferrer" aria-label={s.label} class="opacity-60 hover:opacity-100">
+            <img src={s.icon} alt="" class="w-6 h-6" />
+          </a>
+        ))}
+      </div>
+    </div>
+  </div>
+</footer>
 
 <style>
-  .logo-strip-track {
-    display: inline-flex;
-    align-items: center;
-    width: max-content;
-    animation: footer-marquee 40s linear infinite;
-    --footer-marquee-distance: 0px;
+  .sponsor-track {
+    animation: sponsor-scroll var(--duration) linear infinite;
   }
-
-  .logo-strip-seq {
-    display: inline-flex;
-    align-items: center;
-    gap: 16px;
-  }
-
-  .logo-strip:hover .logo-strip-track {
+  .sponsor-marquee:hover .sponsor-track {
     animation-play-state: paused;
   }
-
-  @keyframes footer-marquee {
-    0% {
-      transform: translateX(0);
-    }
-    100% {
-      transform: translateX(calc(-1 * var(--footer-marquee-distance)));
+  @keyframes sponsor-scroll {
+    to {
+      transform: translateX(-50%);
     }
   }
-
   .scrolling-text-container {
-    top: 0;
-    left: 0;
-    width: 100%;
-    background: #1a1a1a30;
-    height: 100%;
+    position: absolute;
+    inset: 0;
     display: flex;
     align-items: center;
-    justify-content: center;
     overflow: hidden;
-    z-index: 0;
-    position: absolute;
+    background: #1a1a1a30;
   }
-
   .scrolling-text {
     font-size: 20rem;
     font-weight: bolder;
@@ -220,16 +114,16 @@ const sponsorLogos = (SponsorsData.sponsors || []).map((sponsor) => ({
     color: transparent;
     -webkit-text-stroke: 5px rgba(255, 255, 255, 0.03);
     white-space: nowrap;
-    display: inline-block;
     animation: scroll 300s linear infinite;
   }
-
   @keyframes scroll {
-    0% {
-      transform: translateX(100%);
-    }
-    100% {
-      transform: translateX(-100%);
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .sponsor-track,
+    .scrolling-text {
+      animation: none;
     }
   }
 </style>

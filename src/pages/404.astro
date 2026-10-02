@@ -2,34 +2,23 @@
 import Layout from "../layouts/Layout.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
-import HeadTitle from "../components/HeadTitle.astro";
-import Button from "../components/Button.astro";
+import PageHero from "../components/brand/PageHero.astro";
+import BrandButton from "../components/brand/BrandButton.astro";
 ---
 
-<Layout title="404 - Página no encontrada | TARS Robotics">
+<Layout title="Página no encontrada | TARS Robotics UPV">
   <Header />
-  <HeadTitle/>
+  <PageHero eyebrow="Error 404" title="Página no encontrada" />
 
-  <main class="flex items-center justify-cente pb-20">
-    <div class="container mx-auto px-4">
-      <div class="max-w-2xl mx-auto text-center">
-        <div class="mb-8 relative">
-          <h1 class="text-9xl font-bold text-white opacity-90">404</h1>
-        </div>
-        
-        <h2 class="text-3xl md:text-4xl font-bold text-white mb-6">
-          Página no encontrada
-        </h2>
-        
-        <p class="text-xl text-white/70 mb-8">
-          Lo sentimos, la página que estás buscando no existe o ha sido movida.
-        </p>
-        
-       <Button 
-          text="Volver a la página principal"
-          href="/"
-          class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
-        />
+  <main class="mx-auto max-w-6xl px-6 pt-20 flex flex-col sm:flex-row items-start sm:items-center gap-10">
+    <img src="/img/brand/mascota-circulo.png" alt="" class="h-28 w-auto" />
+    <div class="flex flex-col gap-5">
+      <p class="text-lg leading-relaxed text-ink/80 max-w-xl">
+        La página que buscas no existe o se ha movido. Ni el rover la encuentra sin mapa previo.
+      </p>
+      <div class="flex flex-wrap gap-3">
+        <BrandButton href="/">Volver al inicio</BrandButton>
+        <BrandButton href="/#contacto" variant="ghost">Contacto</BrandButton>
       </div>
     </div>
   </main>

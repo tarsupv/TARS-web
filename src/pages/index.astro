@@ -1,610 +1,249 @@
 ---
-import { contentfulClient } from "../lib/contentful";
-import type { work } from "../lib/contentful";
+import { getLatestPosts } from "../lib/contentful";
+import { headerSponsors } from "../lib/sponsors";
 import Layout from "../layouts/Layout.astro";
-import Button from "../components/Button.astro";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
-import Threejs from "../components/threejs.astro";
+import Rover from "../components/threejs.astro";
+import SectionTitle from "../components/brand/SectionTitle.astro";
+import BrandButton from "../components/brand/BrandButton.astro";
 import Competitions from "../../public/json/competitions.json";
 import InternalInitiatives from "../../public/json/internal_initiatives.json";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
-// Get latest blog posts
-const entries = await contentfulClient.getEntries<work>({
-  content_type: "blogTars",
-  order: ["-fields.date"], // Sort by date, newest first
-  limit: 6, // Get more posts for flexibility
-});
-
-const posts = entries.items.map((item) => {
-  const { title, slug, date, headerImg, description, category, readTime } =
-    item.fields;
+const posts = (await getLatestPosts(3)).map((item) => {
+  const { title, slug, date, headerImg, description, category, readTime } = item.fields;
   return {
     title,
     slug,
     date: date ? new Date(date) : null,
-    headerImg,
+    image: headerImg && "fields" in headerImg ? headerImg.fields.file?.url : undefined,
     description,
     category: category || "Noticias",
     readTime: readTime || "5",
   };
 });
 
-const regularPosts = posts.slice(0, 3) || [];
-
-// Get upcoming competitions (could be from Contentful as well)
-const upcomingCompetitions = Competitions.competitions.slice(0, 3);
-const internalInitiatives = InternalInitiatives.initiatives;
+const mainSponsors = headerSponsors();
+const initiatives = InternalInitiatives.initiatives;
 ---
 
-<Layout title="TARS | Innovación y excelencia en robótica competitiva">
+<Layout title="TARS Robotics | Robótica competitiva en la UPV">
   <Header />
   <main>
-    <!-- Hero Section -->
-    <div
-      id="top"
-      class="bg top-0 w-screen h-screen rounded-b-lg flex flex-row items-center justify-between px-3 sm:px-48 relative overflow-hidden"
-    >
-      <div class="flex flex-col items-start gap-3 z-20 relative">
-        <h1 class="mb-0 text-7xl text-white flex flex-col items-start">
-          <span class="opacity-60 text-2xl font-[SourceCodePro] font-medium"
-            >somos_</span
-          >
-          <img src="/img/logo-wordmark.png" class="mt-3 h-16" />
-        </h1>
-        <p class="mb-6 max-w-[450px] text-2xl text-white/60 font-medium">
-          Innovación y excelencia en robótica competitiva
-        </p>
-        <Button text="Descubre nuestros proyectos" href="/#about" />
-      </div>
+    <!-- Hero (visuales de la web antigua) -->
+    <section id="top" class="old-hero-bg relative w-screen overflow-hidden rounded-b-lg pt-20">
+      <iframe src="/html/particles.html" title="" tabindex="-1" class="pointer-events-none top-0 left-0 opacity-60 w-screen h-full absolute"></iframe>
+      <div class="old-grid pointer-events-none left-0 top-0 w-screen h-full absolute"></div>
+      <span class="parallax-text pointer-events-none bottom-32 -left-[60%] sm:-left-[10%] font-[Braille] text-[200px] text-white opacity-5 rotate-90 z-0 absolute">TARS</span>
 
-      <span
-        class="parallax-text bottom-32 -left-[60%] sm:-left-[10%] font-[Braille] text-[200px] text-white opacity-5 rotate-90 z-0 absolute"
-        >TARS</span
-      >
-
-      <iframe
-        src="/html/particles.html"
-        class="top-0 left-0 opacity-60 w-screen h-screen absolute"></iframe>
-
-      <div
-        class="left-0 top-0 hero w-screen h-screen min-h-[800px] -z-10 absolute"
-      >
-      </div>
-
-      <Threejs />
-    </div>
-
-    <div class="w-screen bg-gradient-to-b from-[#121212] to-[#0a0a0a]">
-      <!-- Featured News Section -->
-      <div id="news" class="px-6 sm:px-36 relative">
-        <div
-          class="w-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 -translate-y-16"
-        >
-          {
-            regularPosts.map((post) => (
-              <a
-                href={`work/${post.slug}`}
-                class="post bg-[#181818] rounded-xl overflow-hidden hover:-translate-y-2 hover:shadow-lg transition-all duration-300 group border border-zinc-800/30"
-              >
-                <div class="relative">
-                  <div class="absolute top-3 left-3 z-10 bg-black/70 backdrop-blur-sm text-white text-xs font-medium px-2 py-1 rounded-md">
-                    {post.category}
-                  </div>
-                  <img
-                    src={
-                      post.headerImg && "fields" in post.headerImg
-                        ? post.headerImg.fields.file.url
-                        : ""
-                    }
-                    alt={post.title}
-                    class="w-full h-[220px] object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                </div>
-                <div class="p-5">
-                  <div class="text-gray-400 text-xs flex items-center mb-2">
-                    <span>
-                      {post.date
-                        ? format(post.date, "d MMM, yyyy", { locale: es })
-                        : ""}
-                    </span>
-                    <span class="mx-2">•</span>
-                    <span>{post.readTime} min</span>
-                  </div>
-                  <h2 class="font-bold text-xl text-white group-hover:text-blue-500 transition-colors line-clamp-2">
-                    {post.title}
-                  </h2>
-                  <p class="mb-6 text-white/70 line-clamp-3">
-                    {post.description ||
-                      "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nulla nec dui nec odio."}
-                  </p>
-                  <div class="more">
-                    <div class="w-full h-12 rounded-md bg-white/5 hover:bg-white/10 text-white text-base font-semibold flex items-center justify-center transition-all">
-                      Leer artículo
-                    </div>
-                  </div>
-                </div>
-              </a>
-            ))
-          }
-
-          {
-            regularPosts.length < 3 &&
-              Array.from({ length: 3 - regularPosts.length }).map((_, i) => (
-                <div class="post bg-[#181818] rounded-xl overflow-hidden border border-zinc-800/30 opacity-30">
-                  <div class="relative bg-[#222222] h-[220px]" />
-                  <div class="p-5">
-                    <div class="w-1/3 h-3 bg-[#222222] rounded-full mb-2" />
-                    <div class="w-full h-6 bg-[#222222] rounded-lg mb-2" />
-                    <div class="w-full h-4 bg-[#222222] rounded-lg mb-2" />
-                    <div class="w-2/3 h-4 bg-[#222222] rounded-lg mb-6" />
-                  </div>
-                </div>
-              ))
-          }
-        </div>
-
-        <div class="flex justify-between -translate-y-8">
-          <h3 class="font-[SourceCodePro] text-white/70 text-xl">
-            Últimas noticias_
-          </h3>
-          <a
-            href="/work"
-            class="inline-flex items-center gap-2 text-white opacity-60 hover:opacity-100 transition-all"
-          >
-            Ver todas las noticias
-            <img
-              src="https://unpkg.com/pixelarticons@1.8.1/svg/arrow-right.svg"
-              alt="Arrow right"
-              class="w-6 h-6 invert"
-            />
-          </a>
-        </div>
-      </div>
-
-      <!-- About Section -->
-      <div
-        id="about"
-        class="mt-36 px-6 sm:px-36 flex flex-col sm:flex-row gap-8 items-center"
-      >
-        <div class="max-w-[800px]">
-          <span class="inline-block text-blue-500 text-sm font-medium mb-2"
-            >EQUIPO TARS</span
-          >
-          <h2 class="font-bold text-4xl text-white">Sobre nosotros</h2>
-          <p class="mt-6 mb-6 text-white/80 text-lg leading-relaxed">
-            En TARS UPV, somos apasionados por la robótica y la tecnología. Como
-            grupo universitario de la Universidad Politécnica de Valencia, nos
-            dedicamos a diseñar, construir y programar robots para competir en
-            eventos nacionales e internacionales. Nuestro objetivo es fomentar
-            el aprendizaje y la innovación en el campo de la robótica,
-            proporcionando a nuestros miembros la oportunidad de desarrollar
-            habilidades técnicas y de trabajo en equipo.
+      <div class="relative mx-auto max-w-7xl px-6 grid grid-cols-1 lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] items-center gap-6 min-h-[calc(100svh-11rem)] py-12 lg:py-0">
+        <div class="flex flex-col items-start gap-3 z-20">
+          <h1 class="mb-0 text-white flex flex-col items-start">
+            <span class="font-wide uppercase tracking-[0.2em] sm:tracking-[0.35em] text-white/85 text-sm sm:text-base">Robótica competitiva · UPV</span>
+            <span class="mt-4 flex items-center gap-5">
+              <img src="/img/brand/wordmark-tars-robotics.png" alt="TARS Robotics" class="h-20 sm:h-28 w-auto" />
+              <img src="/img/brand/mascota-circulo.png" alt="" class="h-16 sm:h-24 w-auto" />
+            </span>
+          </h1>
+          <p class="mb-6 max-w-md text-lg sm:text-xl text-white/85 font-light leading-relaxed">
+            Innovación y excelencia en robótica competitiva
           </p>
-          <Button text="Conoce al equipo" href="/team" />
-        </div>
-        <div class="rover-image w-full h-auto transition-all relative">
-          <div
-            class="absolute inset-0 bg-gradient-to-tr from-indigo-800/30 to-transparent mix-blend-overlay rounded-xl opacity-80"
-          >
-          </div>
-          <img
-            src="/img/robot.png"
-            alt="Robot"
-            class="w-full h-auto rounded-xl shadow-xl"
-          />
-          <div
-            class="bg-tilt top-0 w-full h-full rounded-xl rotate-6 bg-[#18181830] transition-all absolute"
-          >
+          <div class="flex flex-wrap gap-3">
+            <BrandButton href="#sobre-nosotros">Descubre el equipo</BrandButton>
+            <BrandButton href="/partners#patrocinadores">Patrocina</BrandButton>
           </div>
         </div>
+
+        <Rover class="h-[380px] sm:h-[480px] lg:h-[600px] w-full" />
       </div>
 
-      <!-- Upcoming Competitions Section -->
-      <div id="competitions" class="px-6 sm:px-36 mt-24 mb-12">
-        <span class="inline-block text-blue-500 text-sm font-medium mb-2"
-          >PRÓXIMOS EVENTOS</span
-        >
-        <div
-          class="mb-6 w-full flex flex-row items-center justify-between gap-6"
-        >
-          <h2 class="font-bold text-4xl text-white">
-            Competiciones y retos destacados
-          </h2>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-          {/* First card - takes full width on mobile, left half on desktop */}
-          <div
-            class="card bg-[#181818] rounded-xl overflow-hidden border border-zinc-800/30 relative group"
-          >
-            <div class="card-inner">
-              <div
-                class="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-black/60 to-transparent z-10"
-              >
-              </div>
-              <img
-                src={upcomingCompetitions[0]?.image}
-                alt={upcomingCompetitions[0]?.title}
-                class="m-3 h-[250px] object-cover rounded-lg transition-transform duration-500 group-hover:scale-[1.02]"
-                style="width: calc(100% - 25px);"
-              />
-              <div
-                class="relative top-0 left-0 w-full h-full z-10 p-6 flex flex-col"
-              >
-                <div class="mt-auto">
-                  <span
-                    class="inline-block px-3 py-1 bg-blue-500/80 text-white text-xs rounded-full mb-3"
-                  >
-                    {`Reto 1`}
-                  </span>
-                  <h3 class="text-2xl font-bold text-white mb-2">
-                    {upcomingCompetitions[0]?.title}
-                  </h3>
-                  <p class="text-white/70 mb-4 line-clamp-3 lg:line-clamp-4">
-                    {upcomingCompetitions[0]?.description}
-                  </p>
-                  {
-                    upcomingCompetitions[0]?.link && (
-                      <a
-                        href={upcomingCompetitions[0]?.link}
-                        class="inline-block mt-2 backdrop-blur-md bg-white/10 hover:bg-white/20 px-4 py-2 rounded-md text-white text-sm transition-colors"
-                      >
-                        Más información
-                      </a>
-                    )
-                  }
-                </div>
-              </div>
-            </div>
-            <div
-              class="hover-effect absolute inset-0 -top-full -left-full pointer-events-none"
-            >
-            </div>
-          </div>
-
-          {/* Right column with stacked cards */}
-          <div class="grid grid-cols-1 gap-6">
-            {
-              upcomingCompetitions.slice(1, 3).map((competition, index) => (
-                <div class="card bg-[#181818] rounded-xl overflow-hidden border border-zinc-800/30 relative group">
-                  <div class="card-inner">
-                    <div class="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-black/60 to-transparent z-10" />
-                    <img
-                      src={competition.image}
-                      alt={competition.title}
-                      class="w-full h-[250px] object-cover blur-sm brightness-50 transition-transform duration-500 scale-110 group-hover:scale-[1.2]"
-                    />
-                    <div class="absolute top-0 left-0 w-full h-full z-10 p-6 flex flex-col">
-                      <div class="mt-auto">
-                        <span class="inline-block px-3 py-1 bg-blue-500/80 text-white text-xs rounded-full mb-3">
-                          {`Reto ${index + 2}`}
-                        </span>
-                        <h3 class="text-2xl font-bold text-white mb-2">
-                          {competition.title}
-                        </h3>
-                        <p class="text-white/70 mb-4 line-clamp-2">
-                          {competition.description}
-                        </p>
-                        {competition.link && (
-                          <a
-                            href={competition.link}
-                            class="inline-block mt-2 backdrop-blur-md bg-white/10 hover:bg-white/20 px-4 py-2 rounded-md text-white text-sm transition-colors"
-                          >
-                            Más información
-                          </a>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                  <div class="hover-effect absolute inset-0 -top-full -left-full pointer-events-none" />
-                </div>
-              ))
-            }
-          </div>
-        </div>
-      </div>
-
-      <!-- Internal Initiatives Section -->
-      <div id="initiatives" class="px-6 sm:px-36 mt-28 scroll-mt-28">
-        <span class="inline-block text-blue-500 text-sm font-medium mb-2">
-          MEJORAS DEL GRUPO
-        </span>
-        <div class="mb-6 w-full flex flex-row items-center justify-between gap-6">
-          <h2 class="font-bold text-4xl text-white">
-            Iniciativas internas
-          </h2>
-        </div>
-        <p class="text-white/70 max-w-3xl mb-8">
-          Talleres y dinamicas internas que usamos para reforzar habilidades tecnicas, organizacion y rendimiento del equipo.
-        </p>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+      <!-- Patrocinadores principales: el nivel que el dossier coloca en la cabecera -->
+      <div class="relative border-t border-white/10">
+        <div class="mx-auto max-w-7xl px-6 py-5 flex flex-wrap items-center gap-x-10 gap-y-5">
+          <img src="/img/brand/logo-upv-blanco.png" alt="Universitat Politècnica de València" class="h-10 w-auto opacity-90" />
+          <img src="/img/brand/logo-generacion-espontanea-blanco.png" alt="Generación Espontánea · UPV Design Factory" class="h-10 w-auto opacity-90" />
           {
-            internalInitiatives.map((initiative) => (
-              <article class="rounded-xl border border-zinc-800/40 bg-[#181818] overflow-hidden hover:-translate-y-1 transition-all">
-                <div class="relative">
-                  <img
-                    src={initiative.image || "/img/defaultbg2.png"}
-                    alt={initiative.title}
-                    class="w-full h-[200px] object-cover"
-                  />
-                  <div class="absolute top-3 left-3 text-xs text-blue-300 bg-black/60 backdrop-blur-sm rounded-full px-3 py-1">
-                    {initiative.focus}
+            mainSponsors.length > 0 && (
+              <div class="flex flex-wrap items-center gap-4 lg:ml-auto">
+                <span class="font-wide uppercase tracking-[0.2em] text-xs text-white/75">Patrocinadores principales</span>
+                {mainSponsors.map((s) => (
+                  <a
+                    href={s.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title={s.name}
+                    class="flex items-center h-14 rounded-lg bg-white px-4 opacity-90 hover:opacity-100 transition-opacity"
+                  >
+                    <img src={s.logo} alt={s.name} class="max-h-9 w-auto max-w-[170px] object-contain" />
+                  </a>
+                ))}
+              </div>
+            )
+          }
+        </div>
+      </div>
+    </section>
+
+    <div class="mx-auto max-w-6xl px-6 flex flex-col gap-28 pt-24">
+      <!-- Noticias (Contentful). En local sin credenciales no hay posts y se omite. -->
+      {
+        posts.length > 0 && (
+          <section>
+            <SectionTitle id="noticias" eyebrow="Actualidad" title="Últimas noticias" link={{ href: "/work", label: "Ver todas las noticias" }} />
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {posts.map((post) => (
+                <a href={`/work/${post.slug}`} class="group flex flex-col gap-4 overflow-hidden rounded-xl bg-[#181818] border border-zinc-800/30 pb-5 hover:-translate-y-2 transition-all [&>*:not(:first-child)]:px-5">
+                  <div class="overflow-hidden bg-tars-50 aspect-[4/3]">
+                    {post.image && (
+                      <img src={post.image} alt="" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy" />
+                    )}
                   </div>
-                  <div class="absolute top-3 right-3 text-xs text-white/80 bg-black/60 backdrop-blur-sm rounded-full px-3 py-1">
-                    {initiative.frequency}
-                  </div>
+                  <p class="text-xs uppercase tracking-wide text-tars">
+                    {post.category}
+                    {post.date && ` · ${format(post.date, "d MMM yyyy", { locale: es })}`}
+                    {` · ${post.readTime} min`}
+                  </p>
+                  <h3 class="text-xl font-semibold leading-snug group-hover:text-tars transition-colors">{post.title}</h3>
+                  {post.description && <p class="text-ink/75 line-clamp-3">{post.description}</p>}
+                </a>
+              ))}
+            </div>
+          </section>
+        )
+      }
+
+      <!-- Sobre nosotros: resumen; el detalle vive en /team -->
+      <section class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div>
+          <SectionTitle id="sobre-nosotros" eyebrow="Equipo TARS" title="Sobre nosotros" />
+          <p class="text-lg leading-relaxed text-ink/85">
+            Somos un equipo multidisciplinar de <span class="text-tars">robótica competitiva</span>
+            de la <span class="text-tars">Universitat Politècnica de València</span>, dentro del
+            programa Generación Espontánea. Diseñamos, programamos y construimos robots para
+            competir en eventos nacionales e internacionales, y nuestro proyecto principal es un
+            rover autónomo de exploración planetaria para la European Rover Challenge.
+          </p>
+          <div class="mt-8 flex flex-wrap gap-3">
+            <BrandButton href="/team">Conoce al equipo</BrandButton>
+            <BrandButton href="/team#que-hacemos" variant="ghost">Qué hacemos</BrandButton>
+          </div>
+        </div>
+        <img
+          src="/img/brand/equipo-2026.webp"
+          alt="El equipo TARS delante del arco de la Universitat Politècnica de València"
+          class="w-full h-auto"
+          loading="lazy"
+        />
+      </section>
+
+      <!-- Competiciones -->
+      <section>
+        <SectionTitle id="competiciones" eyebrow="Próximos eventos" title={`Competiciones ${Competitions.season}`} />
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {
+            Competitions.competitions.map((c) => (
+              <article class="flex flex-col gap-4 rounded-xl bg-[#181818] border border-zinc-800/30 p-6">
+                <div class="h-24 flex items-center justify-center rounded-lg bg-white px-4">
+                  <img src={c.logo} alt={c.title} class="max-h-16 w-auto max-w-[240px] object-contain" loading="lazy" />
                 </div>
-                <div class="p-6">
-                  <h3 class="text-white text-2xl font-bold leading-tight">
-                    {initiative.title}
-                  </h3>
-                  <p class="mt-3 text-white/70 line-clamp-4">{initiative.description}</p>
-                  <div class="mt-5">
-                    <a
-                      href={`/initiatives/${initiative.slug}`}
-                      class="inline-flex items-center gap-2 rounded-lg border border-blue-400/30 bg-blue-500/10 px-4 py-2 text-sm font-medium text-blue-200 transition-colors hover:bg-blue-500/20"
-                    >
-                      Ver iniciativa completa
-                      <img
-                        src="https://unpkg.com/pixelarticons@1.8.1/svg/arrow-right.svg"
-                        alt="Arrow right"
-                        class="w-4 h-4 invert"
-                      />
-                    </a>
-                  </div>
-                  <div class="mt-5 pt-4 border-t border-zinc-700/50 flex items-center gap-3">
-                    <img
-                      src={initiative.leadImage}
-                      alt={initiative.lead}
-                      class="w-10 h-10 rounded-full object-cover border border-zinc-600/60"
-                    />
-                    <div>
-                      <p class="text-xs text-white/50">Responsable del taller</p>
-                      <p class="text-sm text-white font-medium">{initiative.lead}</p>
-                    </div>
-                  </div>
-                </div>
+                <h3 class="text-xl font-semibold">{c.title}</h3>
+                <p class="text-tars text-sm">{c.date} · {c.place}</p>
+                <p class="text-ink/75 leading-relaxed">{c.description}</p>
+                {c.link && (
+                  <a href={c.link} target="_blank" rel="noopener noreferrer" class="mt-auto text-tars text-sm underline underline-offset-4 w-fit">
+                    Web oficial
+                  </a>
+                )}
               </article>
             ))
           }
         </div>
-      </div>
-
-      <!-- Contact Section -->
-      <div id="contact" class="px-6 sm:px-36 mt-36 pb-24">
-        <span class="inline-block text-blue-500 text-sm font-medium mb-2"
-          >ESCRÍBENOS</span
-        >
-        <h2 class="font-bold text-4xl text-white mb-6">Contacto</h2>
-        <div
-          class="w-full text-white text-2xl font-semibold flex flex-col gap-8 relative"
-        >
-          <p class="text-white/70 text-lg">
-            ¿Te gustaría formar parte del equipo o colaborar con nosotros? ¡No
-            dudes en contactarnos!
-          </p>
-
-          <div class="w-full flex flex-col md:flex-row gap-6 mt-4">
-            <div
-              class="w-full md:w-1/2 bg-[#181818] rounded-xl overflow-hidden border border-zinc-800/30"
-            >
-              <iframe
-                class="w-full h-80"
-                src="https://www.openstreetmap.org/export/embed.html?bbox=-0.34337371587753296%2C39.47991812377764%2C-0.34047693014144903%2C39.48158673031113&layer=mapnik&marker=39.48075243204821%2C-0.34192532300949097"
-                style="border: none;"
-              >
-              </iframe>
-            </div>
-
-            <div class="w-full md:w-1/2 flex flex-col gap-4">
-              <a
-                href="https://maps.google.com/?q=Casa de l'Alumne, Camino de Vera"
-                class="p-6 rounded-xl bg-[#181818] hover:bg-[#1e1e1e] flex items-center text-white border border-zinc-800/30 transition-colors group"
-              >
-                <div
-                  class="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center mr-4 group-hover:bg-blue-500/20 transition-colors"
-                >
-                  <img
-                    src="/img/pin.svg"
-                    alt="Dirección"
-                    class="w-6 h-6 invert"
-                  />
-                </div>
-                <div>
-                  <h3 class="text-sm text-white/50 mb-1">DIRECCIÓN</h3>
-                  <p class="text-base">
-                    Garaje Casa de l'Alumne, Camino de Vera, s/n, 46022 Valencia
-                  </p>
-                </div>
-              </a>
-
-              <a
-                href="tel:+34722158786"
-                class="p-6 rounded-xl bg-[#181818] hover:bg-[#1e1e1e] flex items-center text-white border border-zinc-800/30 transition-colors group"
-              >
-                <div
-                  class="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center mr-4 group-hover:bg-blue-500/20 transition-colors"
-                >
-                  <img
-                    src="/img/phone.svg"
-                    alt="Teléfono"
-                    class="w-6 h-6 invert"
-                  />
-                </div>
-                <div>
-                  <h3 class="text-sm text-white/50 mb-1">TELÉFONO</h3>
-                  <p class="text-base">+34 722 158 786</p>
-                </div>
-              </a>
-
-              <a
-                href="mailto:hola@tarsupv.com"
-                class="p-6 rounded-xl bg-[#181818] hover:bg-[#1e1e1e] flex items-center text-white border border-zinc-800/30 transition-colors group"
-              >
-                <div
-                  class="w-12 h-12 rounded-full bg-blue-500/10 flex items-center justify-center mr-4 group-hover:bg-blue-500/20 transition-colors"
-                >
-                  <img src="/img/mail.svg" alt="Email" class="w-6 h-6 invert" />
-                </div>
-                <div>
-                  <h3 class="text-sm text-white/50 mb-1">EMAIL</h3>
-                  <p class="text-base">hola@tarsupv.com</p>
-                </div>
-              </a>
-            </div>
+        <div class="mt-12 grid grid-cols-1 sm:grid-cols-2 rounded-xl bg-[#181818] border border-zinc-800/30">
+          <div class="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-4 px-6 sm:px-8 py-6">
+            <span class="text-tars text-4xl whitespace-nowrap">3º de España</span>
+            <span class="text-ink/75 text-sm">Lucha de robots de 1 lb · Robolid 2026</span>
+          </div>
+          <div class="flex flex-col sm:flex-row sm:items-baseline gap-1 sm:gap-4 px-6 sm:px-8 py-6">
+            <span class="text-tars text-4xl whitespace-nowrap">+100.000</span>
+            <span class="text-ink/75 text-sm">visualizaciones en un mes en redes (abril de 2026)</span>
           </div>
         </div>
-      </div>
+      </section>
 
-      <Footer />
+      <!-- Iniciativas internas -->
+      <section>
+        <SectionTitle id="iniciativas" eyebrow="Mejoras del grupo" title="Iniciativas internas" />
+        <p class="text-lg leading-relaxed max-w-3xl text-ink/85 -mt-2 mb-10">
+          Talleres y dinámicas internas que usamos para reforzar habilidades técnicas,
+          organización y rendimiento del equipo.
+        </p>
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
+          {
+            initiatives.map((initiative) => (
+              <a href={`/initiatives/${initiative.slug}`} class="group flex flex-col rounded-xl bg-[#181818] border border-zinc-800/30 hover:-translate-y-1 transition-all">
+                <div class="overflow-hidden">
+                  <img
+                    src={initiative.image || "/img/defaultbg2.png"}
+                    alt={initiative.title}
+                    class="w-full aspect-[16/10] object-cover transition-transform duration-500 group-hover:scale-105"
+                    loading="lazy"
+                  />
+                </div>
+                <div class="flex flex-col gap-3 p-6 flex-1">
+                  <p class="text-xs uppercase tracking-wide text-tars">
+                    {initiative.focus} · {initiative.frequency}
+                  </p>
+                  <h3 class="text-xl font-semibold group-hover:text-tars transition-colors">{initiative.title}</h3>
+                  <p class="text-ink/75 line-clamp-3">{initiative.description}</p>
+                  <div class="flex items-center gap-3 pt-3 mt-auto border-t border-tars-100">
+                    <img src={initiative.leadImage} alt="" class="w-9 h-9 rounded-full object-cover" loading="lazy" />
+                    <p class="text-sm"><span class="text-ink/60">Responsable:</span> {initiative.lead}</p>
+                  </div>
+                </div>
+              </a>
+            ))
+          }
+        </div>
+      </section>
+
+      <!-- Contacto -->
+      <section class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <div class="flex flex-col gap-6">
+          <SectionTitle id="contacto" eyebrow="Escríbenos" title="Contacto" />
+          <p class="text-lg leading-relaxed -mt-4">
+            ¿Te gustaría formar parte del equipo o colaborar con nosotros? No dudes en contactarnos.
+          </p>
+          {
+            [
+              { label: "Dirección", value: "Garaje Casa de l'Alumne, Camino de Vera, s/n, 46022 Valencia", href: "https://maps.google.com/?q=Casa de l'Alumne, Camino de Vera" },
+              { label: "Teléfono", value: "+34 722 158 786", href: "tel:+34722158786" },
+              { label: "Email", value: "hola@tarsupv.com", href: "mailto:hola@tarsupv.com" },
+            ].map((item) => (
+              <a href={item.href} class="group border-l-4 border-tars pl-5 py-1 flex flex-col">
+                <span class="text-xs uppercase tracking-wide text-tars">{item.label}</span>
+                <span class="text-lg group-hover:text-tars transition-colors">{item.value}</span>
+              </a>
+            ))
+          }
+        </div>
+        <iframe
+          class="w-full h-80 lg:h-full min-h-80 rounded-xl bg-[#181818] border border-zinc-800/30"
+          title="Mapa: Casa de l'Alumne, UPV"
+          loading="lazy"
+          src="https://www.openstreetmap.org/export/embed.html?bbox=-0.34337371587753296%2C39.47991812377764%2C-0.34047693014144903%2C39.48158673031113&layer=mapnik&marker=39.48075243204821%2C-0.34192532300949097"
+        ></iframe>
+      </section>
     </div>
   </main>
+  <Footer />
 </Layout>
 
 <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const parallaxText = document.querySelector(
-      ".parallax-text"
-    ) as HTMLElement;
-
-    window.addEventListener("scroll", () => {
-      const scrollPosition = window.scrollY;
-      parallaxText.style.transform = `translateY(${scrollPosition * 0.3}px) rotate(90deg)`;
-    });
-  });
+  // Texto "TARS" en Braille con paralaje, como en la web antigua.
+  const parallaxText = document.querySelector<HTMLElement>(".parallax-text");
+  window.addEventListener("scroll", () => {
+    if (parallaxText) parallaxText.style.transform = `translateY(${window.scrollY * 0.3}px) rotate(90deg)`;
+  }, { passive: true });
 </script>
-
-<style>
-  .hero {
-    background-color: #ffffff00;
-    opacity: 0.3;
-    background-image: linear-gradient(#ffffff20 1px, transparent 1px),
-      linear-gradient(to right, #ffffff20 1px, #ffffff00 1px);
-    background-size: 40px 40px;
-    mask-image: radial-gradient(circle, white 0%, transparent 70%);
-    -webkit-mask-image: radial-gradient(circle, white 0%, transparent 70%);
-  }
-
-  .bg {
-    background: linear-gradient(
-      45deg,
-      rgba(14, 14, 107, 0.3),
-      rgba(209, 24, 209, 0.15),
-      rgba(173, 216, 230, 0)
-    );
-  }
-
-  .featured-post {
-    position: relative;
-    overflow: hidden;
-  }
-
-  .featured-post::after {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-      45deg,
-      rgba(245, 95, 0, 0.03),
-      rgba(240, 74, 42, 0)
-    );
-    pointer-events: none;
-  }
-
-  h1 {
-    font-size: 4rem;
-    font-weight: 700;
-    line-height: 1;
-    text-align: center;
-  }
-
-  .text-gradient {
-    background-image: var(--accent-gradient);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-size: 400%;
-    background-position: 0%;
-  }
-
-  .more {
-    height: 0;
-    overflow: hidden;
-    transition: height 0.3s;
-  }
-
-  .post:hover .more {
-    height: 48px;
-    transition: height 0.3s;
-  }
-
-  .rover-image {
-    position: relative;
-    border-radius: 1rem;
-    overflow: hidden;
-    box-shadow: 0 15px 25px -12px rgba(0, 0, 0, 0.4);
-    transition: all 0.5s ease;
-  }
-
-  .rover-image:hover {
-    transform: scale(1.03) translateY(-10px);
-  }
-
-  .rover-image:hover .bg-tilt {
-    transform: rotate(-6deg);
-    opacity: 0.6;
-  }
-
-  /* Card hover effect */
-  .card {
-    position: relative;
-    transform-style: preserve-3d;
-    transition: transform 0.3s;
-  }
-
-  .hover-effect {
-    position: absolute;
-    width: 200%;
-    height: 200%;
-    z-index: 1;
-    background: radial-gradient(
-      circle at var(--x) var(--y),
-      rgba(255, 69, 0, 0.1),
-      transparent 20%
-    );
-    mix-blend-mode: soft-light;
-    pointer-events: none;
-    transition: background 0.5s;
-  }
-
-  /* Animations */
-  @keyframes float {
-    0% {
-      transform: translateY(0px);
-    }
-    50% {
-      transform: translateY(-20px);
-    }
-    100% {
-      transform: translateY(0px);
-    }
-  }
-
-  @keyframes pulse {
-    0% {
-      box-shadow: 0 0 0 0 rgba(255, 69, 0, 0.4);
-    }
-    70% {
-      box-shadow: 0 0 0 20px rgba(255, 69, 0, 0);
-    }
-    100% {
-      box-shadow: 0 0 0 0 rgba(255, 69, 0, 0);
-    }
-  }
-</style>

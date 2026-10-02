@@ -1,26 +1,37 @@
-Pasos para añadir un sponsor nuevo
-----------------------------------
+Pasos para añadir un patrocinador
+---------------------------------
+Las categorías siguen el dossier de patrocinio 2026-27. El campo "tier" decide
+dónde aparece cada logo:
+
+  principal      Colaboradores principales: cabecera de la home y primero en /partners
+  platino        cabecera de la home y su sección en /partners
+  oro            carrusel del pie (logo grande) y su sección en /partners
+  plata          carrusel del pie (logo mediano) y su sección en /partners
+  bronce         carrusel del pie (logo pequeño) y su sección en /partners
+  patrocinador   patrocinador sin nivel asignado: carrusel del pie (tamaño intermedio)
+  institucional  Respaldo institucional (UPV, Generación Espontánea): solo en /partners
+
+Un valor distinto no se muestra y, en local, npm run dev avisa por consola.
+
 1) Prepara el logo:
-   - Coloca la imagen en public/img/sponsors/ (PNG o SVG).
-   - Anota la ruta pública, por ejemplo: /img/sponsors/nombre-logo.png.
+   - Colócalo en public/img/sponsors/ (SVG o PNG con fondo transparente).
+   - Se pinta sobre una ficha blanca: usa la versión a color o negra, no la blanca.
 
-2) Añade la entrada en public/json/sponsors.json:
-   - Agrega un objeto dentro del array "sponsors" con este formato:
+2) Añade la entrada en public/json/sponsors.json, dentro de "sponsors":
      {
-       "name": "Nombre del sponsor",
-       "logo": "/img/sponsors/nombre-logo.png",
-       "url": "https://web-del-sponsor.com",
-       "tier": "PATROCINADOR OFICIAL",  // usa uno de: COLABORADOR | PATROCINADOR OFICIAL | SOCIO ESTRATEGICO
-       "description": "Texto opcional para la página dedicada"
+       "name": "Nombre del patrocinador",
+       "logo": "/img/sponsors/nombre-logo.svg",
+       "url": "https://web-del-patrocinador.com",
+       "tier": "patrocinador",
+       "description": "Texto opcional para la página de patrocinadores"
      }
+   El orden dentro de cada nivel es el del JSON.
 
-3) Revisa en local:
-   - Ejecuta npm run dev.
-   - Home: el logo debe salir en la cinta del preview.
-   - /sponsors: debe aparecer en su tier con nombre, logo y descripción.
+3) Revisa en local (npm run dev):
+   - Pie de cualquier página: carrusel (o la cabecera de la home si es principal/platino).
+   - /partners: en su grupo, con logo y descripción.
 
-4) Si quieres cambiar el correo de contacto de patrocinios:
-   - Edita mail_llegada_correos_patrocinios en src/lib/constants.ts.
+4) Correo de contacto de patrocinios: mail_llegada_correos_patrocinios en
+   src/lib/constants.ts.
 
-5) Antes de desplegar:
-   - Ejecuta npm run build para validar.
+5) Antes de desplegar: npm run build.

@@ -1,0 +1,29 @@
+---
+// Titulo de seccion para paginas de flujo continuo: rotulo pequeno en azul y
+// titulo grande, con un enlace opcional a la derecha ("Ver todas...").
+interface Props {
+  eyebrow?: string;
+  title: string;
+  id?: string;
+  link?: { href: string; label: string };
+}
+
+const { eyebrow, title, id, link } = Astro.props;
+---
+
+<div id={id} class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-8 scroll-mt-28">
+  <div class="flex flex-col gap-2">
+    {eyebrow && <span class="text-tars text-sm font-semibold uppercase tracking-[0.15em]">{eyebrow}</span>}
+    <h2 class="font-display font-extrabold uppercase text-3xl sm:text-4xl text-ink leading-tight">{title}</h2>
+  </div>
+  {
+    link && (
+      <a href={link.href} class="group inline-flex items-center gap-2 text-tars font-medium shrink-0">
+        {link.label}
+        <svg class="w-4 h-4 transition-transform group-hover:translate-x-1" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <path d="M5 12h14m-6-6 6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="square" />
+        </svg>
+      </a>
+    )
+  }
+</div>

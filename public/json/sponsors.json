@@ -1,32 +1,53 @@
 {
   "sponsors": [
     {
-      "name": "Generación Espontánea",
-      "logo": "/img/sponsors/logo_ge.png",
+      "name": "Universitat Politècnica de València",
+      "logo": "/img/sponsors/logo_upv.png",
       "url": "https://www.upv.es",
-      "tier": "SOCIO ESTRATEGICO",
+      "tier": "institucional",
+      "description": "La mejor politécnica de España y la universidad a la que pertenece el equipo."
+    },
+    {
+      "name": "Generación Espontánea",
+      "logo": "/img/sponsors/logo_ge_dossier.png",
+      "url": "https://www.upv.es",
+      "tier": "institucional",
       "description": "Programa de la Universitat Politècnica de València que nos proporciona un marco para desarrollar nuestras actividades de forma autónoma."
     },
     {
+      "name": "Robotnik",
+      "logo": "/img/sponsors/logo_robotnik.png",
+      "url": "https://robotnik.eu/",
+      "tier": "principal",
+      "description": "Empresa valenciana de robótica móvil y manipulación, fabricante de robots para industria, logística e investigación."
+    },
+    {
+      "name": "ITI",
+      "logo": "/img/sponsors/logo_iti.webp",
+      "url": "https://www.iti.es/",
+      "tier": "principal",
+      "description": "Instituto Tecnológico de Informática: centro tecnológico de investigación en tecnologías digitales."
+    },
+    {
       "name": "Bricogeek",
-      "logo": "/img/sponsors/logo_bricogeek.png",
+      "logo": "/img/sponsors/logo_bricogeek_dossier.png",
       "url": "https://tienda.bricogeek.com/",
-      "tier": "PATROCINADOR OFICIAL",
+      "tier": "bronce",
       "description": "Empresa de distribución de material de electrónica, robótica y tecnología para proyectos educativos y profesionales."
     },
     {
       "name": "Borrell",
-      "logo": "/img/sponsors/logo_borrell.png",
+      "logo": "/img/sponsors/logo_borrell_dossier.png",
       "url": "https://www.jborrell.es/",
-      "tier": "PATROCINADOR OFICIAL",
+      "tier": "bronce",
       "description": "Empresa de diseño y fabricación de maquinaria para el procesado de frutos secos con presencia internacional."
     },
     {
-      "name": "Smart Materials",
-      "logo": "/img/sponsors/logo_smart_materials.jpg",
-      "url": "https://www.smartmaterials3d.com/",
-      "tier": "COLABORADOR",
-      "description": "Empresa líder de filamentos 3D. Colabora con nosotros ofreciéndonos material de primera al mejor precio."
+      "name": "3Dconnexion",
+      "logo": "/img/sponsors/logo_3dconnexion.png",
+      "url": "https://3dconnexion.com/",
+      "tier": "bronce",
+      "description": "Fabricante de ratones 3D y dispositivos de navegación para diseño CAD."
     }
   ]
 }

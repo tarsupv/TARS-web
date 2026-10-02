@@ -2,6 +2,8 @@
 import Layout from "../../layouts/Layout.astro";
 import Header from "../../components/Header.astro";
 import Footer from "../../components/Footer.astro";
+import DetailHero from "../../components/brand/DetailHero.astro";
+import BrandButton from "../../components/brand/BrandButton.astro";
 import WorkshopsData from "../../../public/json/workshops.json";
 
 interface WorkshopEntity {
@@ -33,7 +35,6 @@ interface Workshop {
 
 export async function getStaticPaths() {
   const workshops = (WorkshopsData.workshops || []) as Workshop[];
-
   return workshops.map((workshop) => ({
     params: { slug: workshop.slug },
     props: { workshop },
@@ -41,201 +42,95 @@ export async function getStaticPaths() {
 }
 
 const { workshop } = Astro.props as { workshop: Workshop };
+
+const facts = [
+  { label: "Fecha", value: workshop.date },
+  { label: "Horario", value: workshop.schedule },
+  { label: "Lugar", value: workshop.location },
+  { label: "Colaboración principal", value: workshop.partner },
+].filter((f) => f.value);
+
+const entityGroups = [
+  { label: "Colaboradores", items: workshop.partners ?? [] },
+  { label: "Patrocinadores", items: workshop.sponsors ?? [] },
+].filter((g) => g.items.length > 0);
 ---
 
 <Layout
   title={`${workshop.title} | Talleres TARS`}
   description={workshop.summary}
   image={workshop.heroImage}
+ 
 >
   <Header />
+  <DetailHero
+    image={workshop.heroImage}
+    title={workshop.title}
+    eyebrow="Taller TARS"
+    summary={workshop.summary}
+    tags={[workshop.category, workshop.status]}
+    back={{ href: "/workshops", label: "Todos los talleres" }}
+  />
 
-  <main class="mx-auto flex max-w-[1400px] flex-col gap-10 px-4 pb-16 pt-28 sm:px-10">
-    <div>
-      <a
-        href="/workshops"
-        class="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-white/[0.03] px-4 py-2 text-sm text-white/75 transition-colors hover:bg-white/[0.06] hover:text-white"
-      >
-        <img
-          src="https://unpkg.com/pixelarticons@1.8.1/svg/arrow-left.svg"
-          alt="Volver"
-          class="h-4 w-4 invert"
-        />
-        Volver a talleres
-      </a>
-    </div>
-
-    <section class="overflow-hidden rounded-[28px] border border-zinc-800/50 bg-[#111111]">
-      <div class="relative min-h-[380px]">
-        <img
-          src={workshop.heroImage}
-          alt={workshop.title}
-          class="absolute inset-0 h-full w-full object-cover"
-        />
-        <div class="absolute inset-0 bg-[linear-gradient(180deg,rgba(7,7,7,0.15),rgba(7,7,7,0.88))]" />
-
-        <div class="relative flex min-h-[380px] flex-col justify-end gap-6 p-8 sm:p-12">
-          <div class="flex flex-wrap gap-2 text-sm">
-            <span class="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-white">
-              {workshop.category}
-            </span>
-            <span class="rounded-full border border-emerald-400/20 bg-emerald-500/15 px-3 py-1 text-emerald-300">
-              {workshop.status}
-            </span>
-            {workshop.date && (
-              <span class="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-white">
-                {workshop.date}
-              </span>
-            )}
-            {workshop.schedule && (
-              <span class="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-white">
-                {workshop.schedule}
-              </span>
-            )}
-            {workshop.location && (
-              <span class="rounded-full border border-white/15 bg-white/10 px-3 py-1 text-white">
-                {workshop.location}
-              </span>
-            )}
-          </div>
-
-          <div class="max-w-4xl">
-            <p class="mb-3 text-sm uppercase tracking-[0.3em] text-blue-300">
-              Taller TARS
-            </p>
-            <h1 class="text-4xl font-bold text-white sm:text-6xl">
-              {workshop.title}
-            </h1>
-            <p class="mt-4 max-w-3xl text-base leading-relaxed text-white/75 sm:text-lg">
-              {workshop.summary}
-            </p>
-          </div>
+  <main class="mx-auto max-w-6xl px-6 pt-16 flex flex-col gap-20">
+    <section class="grid gap-12 lg:grid-cols-[1.5fr_1fr]">
+      <article>
+        <h2 class="font-display font-extrabold uppercase text-2xl mb-6">Sobre el taller</h2>
+        <div class="flex flex-col gap-5 text-lg leading-relaxed text-ink/85">
+          {(workshop.description || []).map((paragraph) => <p>{paragraph}</p>)}
         </div>
-      </div>
-    </section>
-
-    <section class="grid gap-6 lg:grid-cols-[1.4fr_0.8fr]">
-      <article class="rounded-2xl border border-zinc-800/50 bg-[#141414] p-6 sm:p-8">
-        <h2 class="text-2xl font-bold text-white">Sobre el taller</h2>
-        <div class="mt-6 flex flex-col gap-4 text-white/75">
-          {(workshop.description || []).map((paragraph) => (
-            <p class="leading-relaxed">{paragraph}</p>
-          ))}
-        </div>
+        {workshop.highlights && workshop.highlights.length > 0 && (
+          <ul class="mt-8 flex flex-col gap-3">
+            {workshop.highlights.map((h) => (
+              <li class="flex gap-3"><span class="mt-2 w-2 h-2 shrink-0 bg-tars" />{h}</li>
+            ))}
+          </ul>
+        )}
       </article>
 
-      <aside class="flex flex-col gap-6">
-        <div class="rounded-2xl border border-zinc-800/50 bg-[#141414] p-6">
-          <h2 class="text-xl font-bold text-white">Ficha rapida</h2>
-          <div class="mt-5 grid gap-3 text-sm text-white/75">
-            {workshop.date && (
-              <div class="rounded-lg border border-white/8 bg-white/[0.03] px-4 py-3">
-                <span class="block text-xs uppercase tracking-[0.2em] text-white/40">Fecha</span>
-                <span>{workshop.date}</span>
-              </div>
-            )}
-            {workshop.schedule && (
-              <div class="rounded-lg border border-white/8 bg-white/[0.03] px-4 py-3">
-                <span class="block text-xs uppercase tracking-[0.2em] text-white/40">Horario</span>
-                <span>{workshop.schedule}</span>
-              </div>
-            )}
-            {workshop.location && (
-              <div class="rounded-lg border border-white/8 bg-white/[0.03] px-4 py-3">
-                <span class="block text-xs uppercase tracking-[0.2em] text-white/40">Ubicacion</span>
-                <span>{workshop.location}</span>
-              </div>
-            )}
-            {workshop.partner && (
-              <div class="rounded-lg border border-white/8 bg-white/[0.03] px-4 py-3">
-                <span class="block text-xs uppercase tracking-[0.2em] text-white/40">Colaboracion principal</span>
-                <span>{workshop.partner}</span>
-              </div>
-            )}
-          </div>
-
+      <aside class="flex flex-col gap-10">
+        <div class="bg-tars-50 p-6 flex flex-col gap-4">
+          <h2 class="text-tars text-xs font-semibold uppercase tracking-[0.15em]">Ficha rápida</h2>
+          {facts.map((f) => (
+            <div class="border-l-4 border-tars pl-4">
+              <span class="block text-xs uppercase tracking-wide text-ink/55">{f.label}</span>
+              <span>{f.value}</span>
+            </div>
+          ))}
           {workshop.ctaUrl && (
-            <a
-              href={workshop.ctaUrl}
-              class="mt-6 inline-flex items-center gap-2 rounded-lg border border-blue-400/30 bg-blue-500/10 px-4 py-3 text-sm font-medium text-blue-200 transition-colors hover:bg-blue-500/20"
-            >
-              {workshop.ctaLabel || "Mas informacion"}
-              <img
-                src="https://unpkg.com/pixelarticons@1.8.1/svg/arrow-right.svg"
-                alt="Arrow right"
-                class="h-4 w-4 invert"
-              />
-            </a>
+            <div class="pt-2">
+              <BrandButton href={workshop.ctaUrl}>{workshop.ctaLabel || "Más información"}</BrandButton>
+            </div>
           )}
         </div>
 
-        {workshop.partners && workshop.partners.length > 0 && (
-          <div class="rounded-2xl border border-zinc-800/50 bg-[#141414] p-6">
-            <h2 class="text-xl font-bold text-white">Colaboradores</h2>
-            <div class="mt-5 grid gap-3">
-              {workshop.partners.map((item) => (
-                <div class="flex items-center gap-4 rounded-lg border border-white/8 bg-white/[0.03] px-4 py-4">
-                  {item.logo && (
-                    <div class="flex h-14 w-20 shrink-0 items-center justify-center rounded-lg border border-white/8 bg-white p-2">
-                      <img
-                        src={item.logo}
-                        alt={item.name}
-                        class="max-h-8 max-w-full object-contain"
-                        loading="lazy"
-                      />
-                    </div>
-                  )}
-                  <div class="min-w-0">
-                    <p class="text-white">{item.name}</p>
-                    <p class="mt-1 text-sm text-white/55">{item.role}</p>
+        {entityGroups.map((group) => (
+          <div class="flex flex-col gap-4">
+            <h2 class="text-tars text-xs font-semibold uppercase tracking-[0.15em]">{group.label}</h2>
+            {group.items.map((item) => (
+              <div class="flex items-center gap-4 border-b border-tars-100 pb-4">
+                {item.logo && (
+                  <div class="flex h-14 w-20 shrink-0 items-center justify-center rounded-lg bg-white p-2">
+                    <img src={item.logo} alt="" class="max-h-10 max-w-full object-contain" loading="lazy" />
                   </div>
+                )}
+                <div>
+                  <p class="font-medium">{item.name}</p>
+                  <p class="text-sm text-ink/60">{item.role}</p>
                 </div>
-              ))}
-            </div>
+              </div>
+            ))}
           </div>
-        )}
-
-        {workshop.sponsors && workshop.sponsors.length > 0 && (
-          <div class="rounded-2xl border border-zinc-800/50 bg-[#141414] p-6">
-            <h2 class="text-xl font-bold text-white">Patrocinadores</h2>
-            <div class="mt-5 grid gap-3">
-              {workshop.sponsors.map((item) => (
-                <div class="flex items-center gap-4 rounded-lg border border-white/8 bg-white/[0.03] px-4 py-4">
-                  {item.logo && (
-                    <div class="flex h-14 w-20 shrink-0 items-center justify-center rounded-lg border border-white/8 bg-white p-2">
-                      <img
-                        src={item.logo}
-                        alt={item.name}
-                        class="max-h-8 max-w-full object-contain"
-                        loading="lazy"
-                      />
-                    </div>
-                  )}
-                  <div class="min-w-0">
-                    <p class="text-white">{item.name}</p>
-                    <p class="mt-1 text-sm text-white/55">{item.role}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        ))}
       </aside>
     </section>
 
     {workshop.gallery && workshop.gallery.length > 0 && (
-      <section class="rounded-2xl border border-zinc-800/50 bg-[#141414] p-6 sm:p-8">
-        <h2 class="text-2xl font-bold text-white">Galeria</h2>
-        <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <section>
+        <h2 class="font-display font-extrabold uppercase text-2xl mb-6">Galería</h2>
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {workshop.gallery.map((image, index) => (
-            <div class="overflow-hidden rounded-xl border border-white/8 bg-black/20">
-              <img
-                src={image}
-                alt={`${workshop.title} imagen ${index + 1}`}
-                class="h-full w-full object-cover"
-                loading="lazy"
-              />
-            </div>
+            <img src={image} alt={`${workshop.title}, imagen ${index + 1}`} class="w-full aspect-[4/3] object-cover" loading="lazy" />
           ))}
         </div>
       </section>

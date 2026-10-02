@@ -2,7 +2,8 @@
 import Layout from "../../layouts/Layout.astro";
 import Header from "../../components/Header.astro";
 import Footer from "../../components/Footer.astro";
-import HeadTitle from "../../components/HeadTitle.astro";
+import PageHero from "../../components/brand/PageHero.astro";
+import SectionTitle from "../../components/brand/SectionTitle.astro";
 import teamjson from "../../../public/json/team.json";
 import { ViewTransitions } from "astro:transitions";
 
@@ -43,288 +44,307 @@ Object.keys(groupedMembers).forEach((position) => {
 const positions = Object.keys(groupedMembers).filter(
   (pos) => pos.trim() !== "" && groupedMembers[pos].length > 0
 );
+const anchor = (position: string) => position.replace(/\s+/g, "-").toLowerCase();
+const totalMembers = typedTeamJson.length;
 
 const socialLogos: Record<string, string> = {
-  GitHub: `<?xml version="1.0" ?><!DOCTYPE svg  PUBLIC '-//W3C//DTD SVG 1.1//EN'  'http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd'><svg height="100%" id="Layer_1" style="enable-background:new 0 0 512 512;" version="1.1" viewBox="0 0 512 512" width="100%" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><style type="text/css"><![CDATA[
-    .st0{fill-rule:evenodd;clip-rule:evenodd;}
-]]></style><g><path class="st0" d="M256,32C132.3,32,32,134.8,32,261.7c0,101.5,64.2,187.5,153.2,217.9c11.2,2.1,15.3-5,15.3-11.1   c0-5.5-0.2-19.9-0.3-39.1c-62.3,13.9-75.5-30.8-75.5-30.8c-10.2-26.5-24.9-33.6-24.9-33.6c-20.3-14.3,1.5-14,1.5-14   c22.5,1.6,34.3,23.7,34.3,23.7c20,35.1,52.4,25,65.2,19.1c2-14.8,7.8-25,14.2-30.7c-49.7-5.8-102-25.5-102-113.5   c0-25.1,8.7-45.6,23-61.6c-2.3-5.8-10-29.2,2.2-60.8c0,0,18.8-6.2,61.6,23.5c17.9-5.1,37-7.6,56.1-7.7c19,0.1,38.2,2.6,56.1,7.7   c42.8-29.7,61.5-23.5,61.5-23.5c12.2,31.6,4.5,55,2.2,60.8c14.3,16.1,23,36.6,23,61.6c0,88.2-52.4,107.6-102.3,113.3   c8,7.1,15.2,21.1,15.2,42.5c0,30.7-0.3,55.5-0.3,63c0,6.1,4,13.3,15.4,11C415.9,449.1,480,363.1,480,261.7   C480,134.8,379.7,32,256,32z"/></g></svg>`,
-  Twitter: `<?xml version="1.0" ?><!DOCTYPE svg  PUBLIC '-//W3C//DTD SVG 1.1//EN'  'http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd'><svg height="100%" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;" version="1.1" viewBox="0 0 512 512" width="100%" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:serif="http://www.serif.com/" xmlns:xlink="http://www.w3.org/1999/xlink"><path d="M161.014,464.013c193.208,0 298.885,-160.071 298.885,-298.885c0,-4.546 0,-9.072 -0.307,-13.578c20.558,-14.871 38.305,-33.282 52.408,-54.374c-19.171,8.495 -39.51,14.065 -60.334,16.527c21.924,-13.124 38.343,-33.782 46.182,-58.102c-20.619,12.235 -43.18,20.859 -66.703,25.498c-19.862,-21.121 -47.602,-33.112 -76.593,-33.112c-57.682,0 -105.145,47.464 -105.145,105.144c0,8.002 0.914,15.979 2.722,23.773c-84.418,-4.231 -163.18,-44.161 -216.494,-109.752c-27.724,47.726 -13.379,109.576 32.522,140.226c-16.715,-0.495 -33.071,-5.005 -47.677,-13.148l0,1.331c0.014,49.814 35.447,93.111 84.275,102.974c-15.464,4.217 -31.693,4.833 -47.431,1.802c13.727,42.685 53.311,72.108 98.14,72.95c-37.19,29.227 -83.157,45.103 -130.458,45.056c-8.358,-0.016 -16.708,-0.522 -25.006,-1.516c48.034,30.825 103.94,47.18 161.014,47.104" style="fill-rule:nonzero;"/></svg>`,
-  Dribbble: `<?xml version="1.0" ?><svg data-name="Layer 2" id="Layer_2" viewBox="0 0 35 35" xmlns="http://www.w3.org/2000/svg"><path d="M17.5,34.75A17.25,17.25,0,1,1,34.75,17.5,17.27,17.27,0,0,1,17.5,34.75Zm0-32A14.75,14.75,0,1,0,32.25,17.5,14.77,14.77,0,0,0,17.5,2.75Z"/><path d="M9.51,17.17a22.17,22.17,0,0,1-8.17-1.55,1.25,1.25,0,1,1,.91-2.32,20.1,20.1,0,0,0,17-1.17,19.81,19.81,0,0,0,7.52-7.46,1.25,1.25,0,0,1,1.7-.47,1.26,1.26,0,0,1,.47,1.71,22.37,22.37,0,0,1-8.46,8.4A22.42,22.42,0,0,1,9.51,17.17Z"/><path d="M7.6,31.32a1.32,1.32,0,0,1-.54-.12,1.25,1.25,0,0,1-.58-1.67A22.38,22.38,0,0,1,33.82,18.06,1.25,1.25,0,1,1,33,20.42,19.87,19.87,0,0,0,8.73,30.61,1.25,1.25,0,0,1,7.6,31.32Z"/><path d="M22.81,33.84l-.3,0a1.25,1.25,0,0,1-.92-1.51,24.78,24.78,0,0,0,.66-5.72A24.87,24.87,0,0,0,21.06,19a24.16,24.16,0,0,0-2.29-5.1A25,25,0,0,0,9.13,4.62a1.25,1.25,0,1,1,1.19-2.2,27.51,27.51,0,0,1,10.6,10.16,26.61,26.61,0,0,1,2.53,5.62,27.58,27.58,0,0,1,1.3,8.38,27,27,0,0,1-.73,6.3A1.26,1.26,0,0,1,22.81,33.84Z"/></svg>`,
-};
-
-const groupIcons: Record<string, string> = {
-  Presidencia: `<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"> <path d="M8 2h2v2h2v2h-2v10H8V6H6V4h2V2zM4 8V6h2v2H4zm2 10v2H4v2H2V8h2v10h2zm0 0h2v-2H6v2zm6 0h-2v-2h2v2zm2-10V6h-2v2h2zm2 0h-2v10h-2v2h2v2h2v-2h2v-2h2v-2h2V2h-2v2h-2v2h-2v2zm0 0h2V6h2v10h-2v2h-2V8z" fill="currentColor"/> </svg>`,
-  Electronica: `<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"> <path d="M4 5H2v14h18v-4h2V9h-2V5H4zm14 2v10H4V7h14z" fill="currentColor"/> </svg>`,
-  Finanzas: `<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"> <path d="M16 4H2v12h4v4h16V8h-4V4h-2zm0 2v2H6v6H4V6h12zm-8 4h12v8H8v-8zm8 2h-4v4h4v-4z" fill="currentColor"/> </svg>`,
-  Imagen: `<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"> <path d="M24 2H4v16h20V2zM6 16V4h16v12H6zM2 4H0v18h20v-2H2V4zm12 2h2v2h-2V6zm-2 4V8h2v2h-2zm-2 2v-2h2v2h-2zm0 0v2H8v-2h2zm8-2h-2V8h2v2zm0 0h2v2h-2v-2zM8 6h2v2H8V6z" fill="currentColor"/> </svg>`,
-  Mecanica: `<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"> <path d="M17 4H7v2H5v2H3v12h4v-2h10v2h4V8h-2V6h-2V4zm0 2v2h2v2H5V8h2V6h10zm2 10H5v-4h14v4zm-2-3h-2v2h2v-2zM7 13h2v2H7v-2z" fill="currentColor"/> </svg>`,
-  Microrobótica: `<img src="/img/micro.png" alt="Microrobótica" class="w-full h-full object-contain" />`,
-  Software: `<svg fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"> <path d="M8 5h2v2H8V5zM6 7h2v2H6V7zM4 9h2v2H4V9zm-2 2h2v2H2v-2zm2 2h2v2H4v-2zm2 2h2v2H6v-2zm2 2h2v2H8v-2zm8-12h-2v2h2V5zm2 2h-2v2h2V7zm2 2h-2v2h2V9zm2 2h-2v2h2v-2zm-2 2h-2v2h2v-2zm-2 2h-2v2h2v-2zm-2 2h-2v2h2v-2z" fill="currentColor"/> </svg>`,
+  GitHub: `<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path fill-rule="evenodd" d="M256,32C132.3,32,32,134.8,32,261.7c0,101.5,64.2,187.5,153.2,217.9c11.2,2.1,15.3-5,15.3-11.1c0-5.5-0.2-19.9-0.3-39.1c-62.3,13.9-75.5-30.8-75.5-30.8c-10.2-26.5-24.9-33.6-24.9-33.6c-20.3-14.3,1.5-14,1.5-14c22.5,1.6,34.3,23.7,34.3,23.7c20,35.1,52.4,25,65.2,19.1c2-14.8,7.8-25,14.2-30.7c-49.7-5.8-102-25.5-102-113.5c0-25.1,8.7-45.6,23-61.6c-2.3-5.8-10-29.2,2.2-60.8c0,0,18.8-6.2,61.6,23.5c17.9-5.1,37-7.6,56.1-7.7c19,0.1,38.2,2.6,56.1,7.7c42.8-29.7,61.5-23.5,61.5-23.5c12.2,31.6,4.5,55,2.2,60.8c14.3,16.1,23,36.6,23,61.6c0,88.2-52.4,107.6-102.3,113.3c8,7.1,15.2,21.1,15.2,42.5c0,30.7-0.3,55.5-0.3,63c0,6.1,4,13.3,15.4,11C415.9,449.1,480,363.1,480,261.7C480,134.8,379.7,32,256,32z"/></svg>`,
+  Twitter: `<svg viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path d="M161.014,464.013c193.208,0 298.885,-160.071 298.885,-298.885c0,-4.546 0,-9.072 -0.307,-13.578c20.558,-14.871 38.305,-33.282 52.408,-54.374c-19.171,8.495 -39.51,14.065 -60.334,16.527c21.924,-13.124 38.343,-33.782 46.182,-58.102c-20.619,12.235 -43.18,20.859 -66.703,25.498c-19.862,-21.121 -47.602,-33.112 -76.593,-33.112c-57.682,0 -105.145,47.464 -105.145,105.144c0,8.002 0.914,15.979 2.722,23.773c-84.418,-4.231 -163.18,-44.161 -216.494,-109.752c-27.724,47.726 -13.379,109.576 32.522,140.226c-16.715,-0.495 -33.071,-5.005 -47.677,-13.148l0,1.331c0.014,49.814 35.447,93.111 84.275,102.974c-15.464,4.217 -31.693,4.833 -47.431,1.802c13.727,42.685 53.311,72.108 98.14,72.95c-37.19,29.227 -83.157,45.103 -130.458,45.056c-8.358,-0.016 -16.708,-0.522 -25.006,-1.516c48.034,30.825 103.94,47.18 161.014,47.104"/></svg>`,
+  Dribbble: `<svg viewBox="0 0 35 35" xmlns="http://www.w3.org/2000/svg" fill="currentColor"><path d="M17.5,34.75A17.25,17.25,0,1,1,34.75,17.5,17.27,17.27,0,0,1,17.5,34.75Zm0-32A14.75,14.75,0,1,0,32.25,17.5,14.77,14.77,0,0,0,17.5,2.75Z"/><path d="M9.51,17.17a22.17,22.17,0,0,1-8.170-1.550,1.25,1.25,0,1,1,.910-2.320,20.1,20.1,0,0,0,17-1.170,19.81,19.81,0,0,0,7.520-7.460,1.25,1.25,0,0,1,1.7-.470,1.26,1.26,0,0,1,.470,1.710,22.37,22.37,0,0,1-8.460,8.4A22.42,22.42,0,0,1,9.51,17.17Z"/><path d="M7.6,31.32a1.32,1.32,0,0,1-.540-.120,1.25,1.25,0,0,1-.580-1.670A22.38,22.38,0,0,1,33.82,18.06,1.25,1.25,0,1,1,33,20.42,19.87,19.87,0,0,0,8.73,30.61,1.25,1.25,0,0,1,7.6,31.32Z"/><path d="M22.81,33.84l-.3,0a1.25,1.25,0,0,1-.920-1.510,24.78,24.78,0,0,0,.660-5.720A24.87,24.87,0,0,0,21.06,19a24.16,24.16,0,0,0-2.290-5.1A25,25,0,0,0,9.13,4.62a1.25,1.25,0,1,1,1.190-2.2,27.51,27.51,0,0,1,10.6,10.16,26.61,26.61,0,0,1,2.530,5.620,27.58,27.58,0,0,1,1.3,8.380,27,27,0,0,1-.730,6.3A1.26,1.26,0,0,1,22.81,33.84Z"/></svg>`,
 };
 ---
 
-<Layout title="Equipo | TARS Innovación y excelencia en robótica competitiva">
+<Layout title="Equipo | TARS Robotics UPV">
   <ViewTransitions />
-  <Header isWork />
-  <HeadTitle
-    icon="/img/user.svg"
-    text="Equipo"
-    description="Todas las personas que hacen el equipo posible!"
-  />
-
-  <div id="nav-sentinel" class="h-1"></div>
-  <nav
-    class="sticky top-0 z-10 transition-all duration-300 border-white/10"
-    id="nav-filter"
+  <Header />
+  <PageHero
+    eyebrow="Quiénes somos"
+    title="Equipo"
+    description={`Las ${totalMembers} personas que hacen posible TARS, y lo que construimos juntas.`}
   >
-    <div
-      class="max-w-[1500px] p-4 mx-3 sm:mx-auto flex gap-4 overflow-x-auto no-scrollbar -translate-y-20 backdrop-blur-md rounded-full transition-transform"
-      id="nav-container"
-    >
-      {
-        positions.map((position) => (
-          <a
-            href={`#${position.replace(/\s+/g, "-").toLowerCase()}`}
-            class="position px-4 py-2 text-white/60 hover:text-white whitespace-nowrap transition-colors rounded-full bg-white/5 hover:bg-white/10 flex flex-row items-center gap-3"
-          >
-            <span class="w-5 h-5" set:html={groupIcons[position] || ""} /> {position}
-          </a>
-        ))
-      }
-    </div>
-  </nav>
+    <nav class="mt-4 flex flex-wrap gap-3 text-sm">
+      <a href="#quienes-somos" class="px-4 py-2 border border-white/60 hover:bg-white hover:text-tars transition-colors">¿Quiénes somos?</a>
+      <a href="#que-hacemos" class="px-4 py-2 border border-white/60 hover:bg-white hover:text-tars transition-colors">¿Qué hacemos?</a>
+      <a href="#personas" class="px-4 py-2 border border-white/60 hover:bg-white hover:text-tars transition-colors">Las personas</a>
+    </nav>
+  </PageHero>
 
-  <main class="max-w-[1600px] mx-auto px-3 sm:px-16">
-    {
-      Object.entries(groupedMembers).map(([position, members]) => (
-        <section
-          id={position.replace(/\s+/g, "-").toLowerCase()}
-          class="mb-12 scroll-mt-20"
-        >
-          <h2 class="text-3xl font-bold text-white mb-6 flex flex-row items-center gap-3">
-            <span class="w-10 h-10" set:html={groupIcons[position] || ""} />{" "}
-            {position}
-          </h2>
-          <div class="flex flex-wrap gap-4">
-            {members.map((member) => {
-              const defaultBgNum = Math.floor(Math.random() * 5) + 1;
-              const memberLinks = Object.entries(member.links ?? {}).filter(
-                ([, url]) => typeof url === "string" && url.trim() !== ""
-              );
-              return (
-                <div class="team-pill-wrapper w-full sm:w-auto relative z-0 hover:z-50">
-                  <div
-                    class={`team-pill ${
-                      member.isCoordinator
-                        ? "bg-white/20 hover:bg-white/30"
-                        : "bg-white/5 hover:bg-white/10"
-                    } rounded-full p-3 pr-8 flex items-center gap-4 transition-all cursor-pointer z-0`}
-                    transition:name={`team-pill-${member.name}`}
-                  >
-                    <span>
+  <main class="mx-auto max-w-6xl px-6 flex flex-col gap-28 pt-20">
+    <!-- ¿Quiénes somos? (dossier 2026-27) -->
+    <section class="flex flex-col gap-12">
+      <div>
+        <SectionTitle id="quienes-somos" eyebrow="TARS Robotics" title="¿Quiénes somos?" />
+        <p class="text-lg sm:text-xl leading-relaxed max-w-4xl">
+          <span class="text-tars">TARS</span> es un equipo multidisciplinar de
+          <span class="text-tars">robótica competitiva</span>, integrado en el programa de
+          Generación Espontánea de la
+          <span class="text-tars">Universitat Politècnica de València</span>.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 rounded-xl bg-[#181818] border border-zinc-800/30 divide-y sm:divide-y-0 sm:divide-x divide-zinc-800 px-6">
+        <div class="flex flex-wrap items-baseline gap-x-4 gap-y-1 py-6 sm:pr-8">
+          <span class="text-tars text-5xl whitespace-nowrap">Nº1</span>
+          <span class="text-ink/80">Politécnica de España</span>
+        </div>
+        <div class="flex flex-wrap items-baseline gap-x-4 gap-y-1 py-6 sm:pl-8">
+          <span class="text-tars text-5xl whitespace-nowrap">Top 500</span>
+          <span class="text-ink/80">Ranking de Shanghái</span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+        <div class="flex flex-col gap-6 text-lg leading-relaxed">
+          <p>
+            <span class="text-tars">Generación Espontánea</span> es un programa pionero de la
+            <span class="text-tars">UPV</span> creado en 2014. Su objetivo es que los estudiantes
+            apliquen los conocimientos teóricos en proyectos reales.
+          </p>
+          <p>
+            En TARS colaboramos con empresas e instituciones y aprovechamos la diversidad de
+            talento del equipo para afrontar nuevos desafíos y acercar el talento joven al
+            sector tecnológico.
+          </p>
+          <p class="border-l-4 border-tars pl-5">
+            <span class="text-tars font-medium">Propósito:</span> diseñamos, programamos y
+            construimos plataformas robóticas innovadoras capaces de superar retos complejos.
+          </p>
+          <p class="border-l-4 border-tars pl-5">
+            <span class="text-tars font-medium">Objetivo:</span> consolidarnos como una de las
+            referencias nacionales de robótica competitiva e innovación.
+          </p>
+          <p class="border-l-4 border-tars pl-5">
+            <span class="text-tars font-medium">Conocimiento:</span> somos principalmente alumnos
+            de Ingeniería Informática y Robótica, Ingeniería Mecánica e Ingeniería en Electrónica
+            Industrial y Automática.
+          </p>
+        </div>
+        <img
+          src="/img/brand/equipo-2026.webp"
+          alt="El equipo TARS delante del arco de la Universitat Politècnica de València"
+          class="w-full h-auto"
+          loading="lazy"
+        />
+      </div>
+    </section>
+
+    <!-- ¿Qué hacemos? (dossier 2026-27) -->
+    <section class="flex flex-col gap-12">
+      <div>
+        <SectionTitle id="que-hacemos" eyebrow="Nuestros proyectos" title="¿Qué hacemos?" />
+        <p class="text-lg sm:text-xl leading-relaxed max-w-4xl">
+          Automatizamos problemas complejos en entornos donde nada está donde debería: terreno
+          irregular, sin mapa previo y sin intervención humana.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center rounded-xl bg-[#181818] border border-zinc-800/30 p-8">
+        <div class="flex flex-col gap-5">
+          <h3 class="font-display font-extrabold uppercase leading-snug text-xl sm:text-2xl">
+            Proyecto principal:<br />
+            <span class="text-tars">Rover para exploración en Marte</span>
+          </h3>
+          <p class="text-lg leading-relaxed">
+            Plataforma autónoma para terreno irregular, en desarrollo para la European Rover
+            Challenge. Debe navegar, mapear y manipular su entorno sin operador. La plataforma
+            móvil ya está construida; el brazo robótico entra ahora en fabricación.
+          </p>
+        </div>
+        <img src="/img/brand/rover-plataforma.webp" alt="Plataforma móvil del rover TARS" class="w-full max-h-[460px] object-cover object-bottom" loading="lazy" />
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+        <article class="flex flex-col gap-4">
+          <img src="/img/brand/navegacion-simulacion.webp" alt="Rover navegando por terreno marciano simulado y su mapa de elevación" class="w-full aspect-[16/9] object-cover" loading="lazy" />
+          <h3 class="text-tars text-xl uppercase">Navegación validada en simulación</h3>
+          <p class="leading-relaxed">
+            Mapeo y navegación sobre terreno escarpado con física detallada: LiDAR 3D, cámaras
+            de profundidad y cinemática Swerve Drive holonómica.
+          </p>
+        </article>
+        <article class="flex flex-col gap-4">
+          <img src="/img/brand/dron-apoyo.webp" alt="Simulación del dron autónomo de apoyo" class="w-full aspect-[16/9] object-cover" loading="lazy" />
+          <h3 class="text-tars text-xl uppercase">Dron autónomo de apoyo</h3>
+          <p class="leading-relaxed">
+            Despega y aterriza sobre el rover y escanea el entorno desde el aire para elegir
+            rutas óptimas. En fase de diseño y validación de software.
+          </p>
+        </article>
+        <article class="flex flex-col gap-4">
+          <img src="/img/brand/manipulacion-autonoma.webp" alt="Brazo robótico del rover recogiendo un objeto en simulación" class="w-full aspect-[16/9] object-cover" loading="lazy" />
+          <h3 class="text-tars text-xl uppercase">Manipulación autónoma del entorno</h3>
+          <p class="leading-relaxed">
+            El brazo robótico detecta y localiza objetos mediante visión artificial, planifica
+            trayectorias libres de colisiones y los recoge y transporta de forma autónoma.
+            Validado en simulación.
+          </p>
+        </article>
+      </div>
+
+      <div class="rounded-xl bg-[#181818] border border-zinc-800/30 border-l-4 border-l-blue-500 px-6 py-6 flex flex-col gap-2">
+        <p class="uppercase text-sm tracking-wide">
+          Más allá de la competición:
+          <span class="text-tars">tecnología de la UPV para entornos complejos</span>
+        </p>
+        <p class="leading-relaxed">
+          Adaptamos el mismo rover a una versión terrestre para entornos peligrosos: rescate,
+          reconocimiento y exploración. El software que desarrollamos vuelve a la comunidad
+          open source de ROS 2.
+        </p>
+      </div>
+    </section>
+
+    <!-- Las personas -->
+    <section>
+      <SectionTitle id="personas" eyebrow={`${totalMembers} integrantes`} title="Las personas" />
+
+      <nav id="area-nav" class="sticky top-16 sm:top-20 z-20 -mx-6 px-6 py-3 bg-[#121212e8] backdrop-blur-md border-b border-white/10 mb-10">
+        <div class="flex gap-2 overflow-x-auto no-scrollbar">
+          {
+            positions.map((position) => (
+              <a
+                href={`#${anchor(position)}`}
+                class="area-link px-4 py-2 text-sm whitespace-nowrap border border-tars-200 text-tars hover:bg-tars-50 transition-colors"
+              >
+                {position}
+              </a>
+            ))
+          }
+        </div>
+      </nav>
+
+      {
+        Object.entries(groupedMembers).map(([position, members]) => (
+          <section id={anchor(position)} class="area mb-14 scroll-mt-40">
+            <h3 class="font-display font-extrabold uppercase text-2xl text-ink mb-6 flex items-center gap-3">
+              <span class="w-3 h-3 bg-tars" />
+              {position}
+            </h3>
+            <div class="flex flex-wrap gap-4">
+              {members.map((member) => {
+                const defaultBgNum = Math.floor(Math.random() * 5) + 1;
+                const isLead = position === "Presidencia" && member.coordinator;
+                const memberLinks = Object.entries(member.links ?? {}).filter(
+                  ([, url]) => typeof url === "string" && url.trim() !== ""
+                );
+                return (
+                  <div class="team-pill-wrapper w-full sm:w-auto relative z-0 hover:z-50">
+                    <div
+                      class={`team-pill ${
+                        member.isCoordinator ? "bg-white/20 hover:bg-white/30 text-white" : "bg-white/5 hover:bg-white/10 text-white"
+                      } rounded-full p-2 pr-8 flex items-center gap-4 cursor-pointer`}
+                      transition:name={`team-pill-${member.name}`}
+                    >
                       <img
                         src={member.pfp1 ? member.pfp1 : "/img/mascot_png.png"}
-                        alt={member.name}
-                        class={`${position === "Presidencia" && member.coordinator ? "w-20 h-20" : "w-12 h-12"} rounded-full z-10 absolute`}
+                        alt=""
+                        class={`${isLead ? "w-20 h-20" : "w-12 h-12"} rounded-full object-cover bg-zinc-800`}
                         transition:name={`team-image-${member.name}`}
                       />
-                      <div class={`${position === "Presidencia" && member.coordinator ? "w-20 h-20" : "w-12 h-12"} rounded-full overflow-hidden relative`}>
-                        <img
-                          src={member.pfp ? member.pfp : `/img/defaultbg${defaultBgNum}.png`}
-                          alt={member.name}
-                          class="w-full h-full blur-xl object-cover"
-                          transition:name={`team-image-${member.name}`}
-                        />
+                      <div>
+                        <p class={`${isLead ? "text-2xl" : "text-lg"} font-semibold leading-tight`}>{member.name}</p>
+                        {isLead && <p class="text-sm opacity-80">{member.coordinator}</p>}
                       </div>
-                    </span>
-                    <div transition:name={`team-content-${member.name}`}>
-                      <h3
-                        class={`${position === "Presidencia" && member.coordinator ? "text-2xl" : "text-xl"} text-white font-semibold`}
-                        transition:name={`team-name-${member.name}`}
-                      >
-                        {member.name}
-                        {position === "Presidencia" && member.coordinator && (
-                          <p class="mb-2 text-white/60 font-normal text-[17px]">
-                            {member.coordinator}
-                          </p>
-                        )}
-                      </h3>
                     </div>
-                  </div>
-                  <div
-                    class={`expanded-content ${
-                      member.isCoordinator
-                        ? "border-[#383838] bg-[#383838]"
-                        : "border-[#181818] bg-[#181818]"
-                    } opacity-0 pointer-events-none absolute top-0 left-0 border-4 rounded-[1.6rem] transition-all duration-300 z-50`}
-                    transition:name={`expanded-content-${member.name}`}
-                  >
-                    <span class="block relative" id="parallax-container">
-                      <img
-                        src={member.pfp1 ? member.pfp1 : "/img/mascot_png.png"}
-                        alt={member.name}
-                        class="bottom-0 w-56 z-10 absolute transition-transform duration-300 ease-out person-image"
-                        transition:name={`team-image-${member.name}`}
-                      />
-                      <div class={`px-4 bottom-0 left-0 w-full py-3 rounded-b-3xl z-20 absolute bg-gradient-to-t from-[#383838] to-transparent ${memberLinks.length > 0 ? "pr-16" : ""}`}>
-                        <h3
-                          class="text-xl font-bold text-white"
-                          transition:name={`team-name-${member.name}`}
-                        >
-                          {member.name}
-                          <p class="text-white/60 font-normal text-sm">
-                            {member.isCoordinator ? "Coordinador de" : ""}{" "}
-                            {member.coordinator && (
-                              <span>{member.coordinator} · </span>
-                            )}
+
+                    <div class="expanded-content opacity-0 pointer-events-none absolute top-0 left-0 bg-[#383838] border-4 border-[#383838] rounded-[1.6rem] overflow-hidden transition-all duration-300 z-50">
+                      <span class="block relative parallax-container">
+                        <img
+                          src={member.pfp1 ? member.pfp1 : "/img/mascot_png.png"}
+                          alt={member.name}
+                          class="bottom-0 w-56 z-10 absolute transition-transform duration-300 ease-out person-image"
+                        />
+                        <div class={`px-4 bottom-0 left-0 w-full py-3 z-20 absolute bg-gradient-to-t from-[#383838] to-transparent ${memberLinks.length > 0 ? "pr-24" : ""}`}>
+                          <p class="text-xl font-bold text-white">{member.name}</p>
+                          <p class="text-tars text-sm">
+                            {member.isCoordinator ? "Coordinación · " : ""}
+                            {member.coordinator && <span>{member.coordinator} · </span>}
                             {member.position}
                           </p>
-                        </h3>
-                      </div>
-                      {memberLinks.length > 0 && (
-                        <div class="absolute bottom-3 right-3 z-30 flex gap-2">
-                          {memberLinks.map(([platform, url]) => (
-                            <a
-                              href={url as string}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              class="social-chip flex h-9 w-9 shrink-0 items-center justify-center rounded-full transition-colors"
-                              data-platform={platform}
-                              aria-label={platform}
-                            >
-                              {
-                                platform === "LinkedIn" ? (
-                                  <img
-                                    src="/img/linkedin.svg"
-                                    alt="LinkedIn"
-                                    class="h-4 w-4 invert"
-                                  />
-                                ) : (
-                                  <div
-                                    class="w-4 social-logo invert"
-                                    set:html={socialLogos[platform] || ""}
-                                  />
-                                )
-                              }
-                            </a>
-                          ))}
                         </div>
-                      )}
-                      <div class="w-full h-32 rounded-3xl transition-all duration-300 ease-out overflow-hidden">
-                        <img
-                          src={member.pfp ? member.pfp : `/img/defaultbg${defaultBgNum}.png`}
-                          alt={member.name}
-                          class="w-[120%] max-w-[120%] background-image"
-                          transition:name={`team-image-${member.name}`}
-                        />
-                      </div>
-                    </span>
+                        {memberLinks.length > 0 && (
+                          <div class="absolute bottom-3 right-3 z-30 flex gap-2">
+                            {memberLinks.map(([platform, url]) => (
+                              <a
+                                href={url as string}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                class="flex h-9 w-9 items-center justify-center bg-tars text-white hover:bg-tars-700 transition-colors"
+                                aria-label={platform}
+                              >
+                                {platform === "LinkedIn" ? (
+                                  <img src="/img/linkedin.svg" alt="" class="h-4 w-4 invert" />
+                                ) : (
+                                  <span class="w-4 h-4" set:html={socialLogos[platform] || platform.charAt(0)} />
+                                )}
+                              </a>
+                            ))}
+                          </div>
+                        )}
+                        <div class="w-full h-36 overflow-hidden bg-tars-50">
+                          <img
+                            src={member.pfp ? member.pfp : `/img/defaultbg${defaultBgNum}.png`}
+                            alt=""
+                            class="w-[120%] max-w-[120%] background-image opacity-80"
+                          />
+                        </div>
+                      </span>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-      ))
-    }
+                );
+              })}
+            </div>
+          </section>
+        ))
+      }
+    </section>
   </main>
 
   <Footer />
 </Layout>
 
 <style>
-  html {
-    scroll-behavior: smooth;
-  }
-
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
-
   .no-scrollbar {
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
 
   .team-pill {
-    transform: translateY(0);
-    transition: all 0.2s ease;
+    transition: transform 0.2s ease, opacity 0.2s ease;
   }
   .team-pill:hover {
     transform: translateY(-2px);
   }
-
-  .team-pill-wrapper {
-    transform: scale(1);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .team-pill-wrapper:hover {
-    transform: scale(1);
-  }
-
   .team-pill-wrapper:hover .team-pill {
     opacity: 0.3;
     pointer-events: none;
   }
 
   .expanded-content {
-    transform: scale(0.8);
+    transform: scale(0.85);
     transform-origin: center;
     min-width: 300px;
     width: 100%;
     max-width: 400px;
   }
-
   .team-pill-wrapper:hover .expanded-content {
     opacity: 1;
     pointer-events: auto;
     transform: scale(1);
   }
-
   @media (min-width: 640px) {
     .expanded-content {
       width: 400px;
     }
   }
 
-  ::view-transition-old(root),
-  ::view-transition-new(root) {
-    animation: none;
-    mix-blend-mode: normal;
-  }
-
-  ::view-transition-old(team-image),
-  ::view-transition-new(team-image) {
-    animation: 300ms cubic-bezier(0.4, 0, 0.2, 1);
-  }
-
-  .social-chip[data-platform="LinkedIn"] {
-    background: linear-gradient(135deg, rgba(37, 99, 235, 0.9), rgba(29, 78, 216, 0.9));
-    border: 1px solid rgba(96, 165, 250, 0.28);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
-  }
-  .social-chip[data-platform="GitHub"] {
-    background-color: #a3a3a3;
-  }
-  .social-chip[data-platform="Twitter"] {
-    background-color: #1da1f2;
-  }
-  .social-chip[data-platform="Dribbble"] {
-    background-color: #ea4c89;
-  }
-
-  .social-chip[data-platform="LinkedIn"]:hover {
-    background: linear-gradient(135deg, rgba(59, 130, 246, 0.95), rgba(37, 99, 235, 0.95));
-  }
-  .social-chip[data-platform="GitHub"]:hover {
-    background-color: #8c8c8c;
-  }
-  .social-chip[data-platform="Twitter"]:hover {
-    background-color: #1a91da;
-  }
-  .social-chip[data-platform="Dribbble"]:hover {
-    background-color: #d84c89;
+  .area-link.active {
+    background: #00008b;
+    border-color: #00008b;
+    color: #fff;
   }
 
   .person-image,
@@ -334,90 +354,55 @@ const groupIcons: Record<string, string> = {
 </style>
 
 <script>
-  const sections = document.querySelectorAll("section");
-  const navLinks = document.querySelectorAll(".position");
+  // Marca en el filtro el area que se esta viendo.
+  const links = document.querySelectorAll<HTMLAnchorElement>(".area-link");
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        links.forEach((link) =>
+          link.classList.toggle("active", link.getAttribute("href") === `#${entry.target.id}`)
+        );
+      });
+    },
+    { rootMargin: "-40% 0px -55% 0px" }
+  );
+  document.querySelectorAll("section.area").forEach((s) => observer.observe(s));
 
-  const observerOptions = {
-    root: null,
-    rootMargin: "0px",
-    threshold: 0.5,
-  };
-
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        const activeId = entry.target.id;
-        navLinks.forEach((link) => {
-          if (link.getAttribute("href") === `#${activeId}`) {
-            link.classList.add("text-white", "bg-white/10");
-          } else {
-            link.classList.remove("text-white", "bg-white/10");
-          }
-        });
+  // La ficha ampliada mide 400px y cuelga del borde izquierdo de cada persona.
+  // En las de la ultima columna se salia por la derecha y, aunque este oculta,
+  // creaba scroll horizontal: se ancla a la derecha cuando no cabe.
+  const placeCards = () => {
+    const limit = document.documentElement.clientWidth - 8;
+    document.querySelectorAll<HTMLElement>(".team-pill-wrapper").forEach((wrapper) => {
+      const card = wrapper.querySelector<HTMLElement>(".expanded-content");
+      if (!card) return;
+      card.style.left = "0";
+      card.style.right = "auto";
+      const overflows = wrapper.getBoundingClientRect().left + card.offsetWidth > limit;
+      if (overflows) {
+        card.style.left = "auto";
+        card.style.right = "0";
       }
     });
-  }, observerOptions);
+  };
+  placeCards();
+  window.addEventListener("resize", placeCards, { passive: true });
 
-  sections.forEach((section) => observer.observe(section));
-
-  const navContainer = document.getElementById("nav-container");
-  const sentinel = document.getElementById("nav-sentinel");
-
-  const observer2 = new IntersectionObserver(
-    ([e]) => {
-      if (!e.isIntersecting) {
-        navContainer?.classList.remove(
-          "rounded-full",
-          "max-w-[1500px]",
-          "-translate-y-20"
-        );
-        navContainer?.classList.add(
-          "border-b",
-          "border-white/10",
-          "bg-[#121212e8]",
-          "pt-20",
-          "px-16"
-        );
-      } else {
-        navContainer?.classList.add(
-          "rounded-full",
-          "max-w-[1500px]",
-          "-translate-y-20"
-        );
-        navContainer?.classList.remove(
-          "border-b",
-          "pt-20",
-          "px-16",
-          "bg-[#121212e8]"
-        );
-      }
-    },
-    { threshold: [0] }
-  );
-
-  if (sentinel) {
-    observer2.observe(sentinel);
-  }
-
-  document.querySelectorAll("#parallax-container").forEach((container) => {
-    const person = container.querySelector(".person-image") as HTMLElement;
-    const background = container.querySelector(".background-image") as HTMLElement;
-
-    if (person && background) {
-      container.addEventListener("mousemove", (e: MouseEvent) => {
-        const rect = container.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const centerX = rect.width / 2;
-        const offsetX = ((x - centerX) / centerX) * 30;
-
-        person.style.transform = `translateX(${offsetX / 5}px)`;
-        background.style.transform = `translateX(${-20 + -offsetX / 10}px)`;
-      });
-
-      container.addEventListener("mouseleave", () => {
-        person.style.transform = "translateX(0)";
-        background.style.transform = "translateX(-20px)";
-      });
-    }
+  // Paralaje suave de la ficha ampliada.
+  document.querySelectorAll<HTMLElement>(".parallax-container").forEach((container) => {
+    const person = container.querySelector<HTMLElement>(".person-image");
+    const background = container.querySelector<HTMLElement>(".background-image");
+    if (!person || !background) return;
+    container.addEventListener("mousemove", (e) => {
+      const rect = container.getBoundingClientRect();
+      const offset = ((e.clientX - rect.left - rect.width / 2) / (rect.width / 2)) * 30;
+      person.style.transform = `translateX(${offset / 5}px)`;
+      background.style.transform = `translateX(${-20 - offset / 10}px)`;
+    });
+    container.addEventListener("mouseleave", () => {
+      person.style.transform = "translateX(0)";
+      background.style.transform = "translateX(-20px)";
+    });
   });
 </script>

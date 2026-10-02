@@ -13,7 +13,7 @@ const {
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <meta
@@ -21,9 +21,16 @@ const {
       content="TARS UPV - Innovación y excelencia en programación robótica"
     />
     <meta name="viewport" content="width=device-width" />
-    <link rel="icon" type="image/svg+xml" href="/img/logo-isotype.png" />
+    <link rel="icon" type="image/png" href="/img/brand/favicon.png" />
+    <link rel="apple-touch-icon" href="/img/brand/apple-touch-icon.png" />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Gruppo&family=Open+Sans:wght@700;800&family=Poppins:wght@300;400;500;600;700&display=swap"
+    />
     <meta name="theme-color" content="#3333ff" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
@@ -47,38 +54,57 @@ const {
       content="black-translucent"
     />
     <meta name="apple-mobile-web-app-title" content="TARS UPV" />
-    <link rel="apple-touch-icon" href="/img/logo-isotype.png" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/img/logo-isotype.png" />
-    <link rel="apple-touch-icon" sizes="167x167" href="/img/logo-isotype.png" />
-    <link rel="apple-touch-icon" sizes="152x152" href="/img/logo-isotype.png" />
-    <link rel="apple-touch-icon" sizes="120x120" href="/img/logo-isotype.png" />
-    <link rel="apple-touch-icon" sizes="76x76" href="/img/logo-isotype.png" />
-    <link rel="apple-touch-icon" sizes="60x60" href="/img/logo-isotype.png" />
-    <link rel="apple-touch-icon" sizes="57x57" href="/img/logo-isotype.png" />
-    <link rel="apple-touch-icon" sizes="40x40" href="/img/logo-isotype.png" />
-    <link rel="apple-touch-icon" sizes="32x32" href="/img/logo-isotype.png" />
-    <link rel="apple-touch-icon" sizes="16x16" href="/img/logo-isotype.png" />
   </head>
   <body>
     <slot />
   </body>
 </html>
 <style is:global>
-  :root {
-    --accent: 136, 58, 234;
-    --accent-light: 224, 204, 250;
-    --accent-dark: 49, 10, 101;
-    --accent-gradient: linear-gradient(
-      45deg,
-      rgb(var(--accent)),
-      rgb(var(--accent-light)) 30%,
-      white 60%
-    );
-  }
   html {
-    font-family: system-ui, sans-serif;
-    background: #070707 !important;
+    font-family: "Poppins", system-ui, sans-serif;
+    background: #070707;
+    color: #f4f4f5;
     scroll-behavior: smooth;
+  }
+
+  @font-face {
+    font-family: "Braille";
+    src: url("/fonts/Braille.ttf") format("truetype");
+  }
+  @font-face {
+    font-family: "SourceCodePro";
+    src: url("/fonts/SourceCodePro.ttf") format("truetype");
+  }
+
+  /* Botones con esquinas pixeladas de la web antigua. */
+  .pixel-corners {
+    clip-path: polygon(0px calc(100% - 6px), 3px calc(100% - 6px), 3px calc(100% - 3px), 6px calc(100% - 3px), 6px 100%, calc(100% - 6px) 100%, calc(100% - 6px) calc(100% - 3px), calc(100% - 3px) calc(100% - 3px), calc(100% - 3px) calc(100% - 6px), 100% calc(100% - 6px), 100% 6px, calc(100% - 3px) 6px, calc(100% - 3px) 3px, calc(100% - 6px) 3px, calc(100% - 6px) 0px, 6px 0px, 6px 3px, 3px 3px, 3px 6px, 0px 6px);
+    position: relative;
+    border: 3px solid transparent;
+  }
+  .pixel-corners::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    margin: -3px;
+    clip-path: polygon(0px calc(100% - 6px), 3px calc(100% - 6px), 3px calc(100% - 3px), 6px calc(100% - 3px), 6px 100%, calc(100% - 6px) 100%, calc(100% - 6px) calc(100% - 3px), calc(100% - 3px) calc(100% - 3px), calc(100% - 3px) calc(100% - 6px), 100% calc(100% - 6px), 100% 6px, calc(100% - 3px) 6px, calc(100% - 3px) 3px, calc(100% - 6px) 3px, calc(100% - 6px) 0px, 6px 0px, 6px 3px, 3px 3px, 3px 6px, 0px 6px, 0px 50%, 3px 50%, 3px 6px, 6px 6px, 6px 3px, calc(100% - 6px) 3px, calc(100% - 6px) 6px, calc(100% - 3px) 6px, calc(100% - 3px) calc(100% - 6px), calc(100% - 6px) calc(100% - 6px), calc(100% - 6px) calc(100% - 3px), 6px calc(100% - 3px), 6px calc(100% - 6px), 3px calc(100% - 6px), 3px 50%, 0px 50%);
+    background: #ffffff;
+    pointer-events: none;
+  }
+  .pixel-corners:active {
+    transform: translate(0, 3px);
+  }
+
+  /* Fondo de las cabeceras antiguas: degradado azul-magenta sobre negro. */
+  .old-hero-bg {
+    background: linear-gradient(45deg, rgba(14, 14, 107, 0.3), rgba(209, 24, 209, 0.15), rgba(173, 216, 230, 0));
+  }
+  .old-grid {
+    opacity: 0.3;
+    background-image: linear-gradient(#ffffff20 1px, transparent 1px), linear-gradient(to right, #ffffff20 1px, #ffffff00 1px);
+    background-size: 40px 40px;
+    mask-image: radial-gradient(circle, white 0%, transparent 70%);
+    -webkit-mask-image: radial-gradient(circle, white 0%, transparent 70%);
   }
   code {
     font-family:
@@ -92,13 +118,5 @@ const {
       monospace;
   }
 
-  @font-face {
-    font-family: "Braille";
-    src: url("../fonts/Braille.ttf") format("truetype");
-  }
 
-  @font-face {
-    font-family: "SourceCodePro";
-    src: url("../fonts/SourceCodePro.ttf") format("truetype");
-  }
 </style>

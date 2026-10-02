@@ -1,0 +1,41 @@
+---
+// Trama de triangulos de la portada del dossier: filas de triangulos hacia abajo
+// que menguan hasta desaparecer, y un poco mas pequenos hacia los lados.
+// Se genera en SVG (la imagen del PDF era raster y traia marca de agua).
+interface Props {
+  rows?: number;
+  cols?: number;
+  class?: string;
+}
+
+const { rows = 11, cols = 17, class: className = "" } = Astro.props;
+
+const cell = 10;
+const triangles: string[] = [];
+for (let r = 0; r < rows; r++) {
+  const fade = 1 - r / rows; // menguan fila a fila
+  for (let c = 0; c < cols; c++) {
+    const fromCentre = Math.abs(c - (cols - 1) / 2) / ((cols - 1) / 2);
+    const size = cell * 0.78 * fade * (1 - 0.35 * fromCentre ** 2);
+    if (size < 0.35) continue;
+    const cx = c * cell + cell / 2;
+    const cy = r * cell + cell / 2;
+    const h = size * 0.86;
+    triangles.push(
+      `${(cx - size / 2).toFixed(2)},${(cy - h / 2).toFixed(2)} ` +
+        `${(cx + size / 2).toFixed(2)},${(cy - h / 2).toFixed(2)} ` +
+        `${cx.toFixed(2)},${(cy + h / 2).toFixed(2)}`
+    );
+  }
+}
+---
+
+<svg
+  class={className}
+  viewBox={`0 0 ${cols * cell} ${rows * cell}`}
+  preserveAspectRatio="xMidYMin slice"
+  aria-hidden="true"
+  fill="currentColor"
+>
+  {triangles.map((points) => <polygon points={points} />)}
+</svg>
