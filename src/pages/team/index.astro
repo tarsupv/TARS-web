@@ -247,14 +247,14 @@ const socialLogos: Record<string, string> = {
                       </div>
                     </div>
 
-                    <div class="expanded-content opacity-0 pointer-events-none absolute top-0 left-0 bg-[#383838] border-4 border-[#383838] rounded-[1.6rem] overflow-hidden transition-all duration-300 z-50">
+                    <div class="expanded-content opacity-0 pointer-events-none absolute top-0 left-0 bg-[#383838] border-4 border-[#383838] rounded-[1.6rem] transition-all duration-300 z-50">
                       <span class="block relative parallax-container">
                         <img
                           src={member.pfp1 ? member.pfp1 : "/img/mascot_png.png"}
                           alt={member.name}
                           class="bottom-0 w-56 z-10 absolute transition-transform duration-300 ease-out person-image"
                         />
-                        <div class={`px-4 bottom-0 left-0 w-full py-3 z-20 absolute bg-gradient-to-t from-[#383838] to-transparent ${memberLinks.length > 0 ? "pr-24" : ""}`}>
+                        <div class={`px-4 bottom-0 left-0 w-full py-3 z-20 absolute rounded-b-3xl bg-gradient-to-t from-[#383838] to-transparent ${memberLinks.length > 0 ? "pr-24" : ""}`}>
                           <p class="text-xl font-bold text-white">{member.name}</p>
                           <p class="text-tars text-sm">
                             {member.isCoordinator ? "Coordinación · " : ""}
@@ -281,7 +281,7 @@ const socialLogos: Record<string, string> = {
                             ))}
                           </div>
                         )}
-                        <div class="w-full h-36 overflow-hidden bg-tars-50">
+                        <div class="w-full h-36 rounded-3xl overflow-hidden bg-tars-50">
                           <img
                             src={member.pfp ? member.pfp : `/img/defaultbg${defaultBgNum}.png`}
                             alt=""
