@@ -31,7 +31,7 @@ Un valor distinto no se muestra y, en local, npm run dev avisa por consola.
    - Pie de cualquier página: carrusel (o la cabecera de la home si es principal/platino).
    - /partners: en su grupo, con logo y descripción.
 
-4) Correo de contacto de patrocinios: mail_llegada_correos_patrocinios en
+4) Correo de contacto (todos los botones de la web): correo_patrocinio en
    src/lib/constants.ts.
 
 5) Antes de desplegar: npm run build.

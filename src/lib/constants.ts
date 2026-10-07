@@ -1,8 +1,7 @@
-export const mail_llegada_correos_patrocinios =
-  "gabriel@tarsupv.com";
+// Correo corporativo: destino de todos los botones de contacto de la web.
+export const correo_patrocinio = "hola@tarsupv.com";
 
 // Botones de la seccion de patrocinadores (/partners).
-export const correo_patrocinio = "hola@tarsupv.com";
 export const enlace_ser_patrocinador = `mailto:${correo_patrocinio}?subject=${encodeURIComponent(
   "Quiero ser patrocinador de TARS Robotics UPV"
 )}`;

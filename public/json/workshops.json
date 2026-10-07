@@ -1,6 +1,6 @@
 {
   "featuredMessage": "Espacio donde reunimos los talleres que organizamos desde TARS para compartir herramientas, procesos y experiencia practica.",
-  "contactUrl": "mailto:tarsupv@gmail.com?subject=Quiero%20informacion%20sobre%20los%20talleres%20de%20TARS",
+  "contactUrl": "mailto:hola@tarsupv.com?subject=Quiero%20informacion%20sobre%20los%20talleres%20de%20TARS",
   "workshops": [
     {
       "slug": "taller-siguelineas-oprobots",
@@ -44,7 +44,7 @@
         }
       ],
       "ctaLabel": "Pedir informacion",
-      "ctaUrl": "mailto:tarsupv@gmail.com?subject=Informacion%20sobre%20el%20taller%20siguelineas"
+      "ctaUrl": "mailto:hola@tarsupv.com?subject=Informacion%20sobre%20el%20taller%20siguelineas"
     }
   ]
 }

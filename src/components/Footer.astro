@@ -1,10 +1,10 @@
 ---
 import BrandButton from "./brand/BrandButton.astro";
 import { footerSponsors } from "../lib/sponsors";
-import { mail_llegada_correos_patrocinios } from "../lib/constants";
+import { correo_patrocinio } from "../lib/constants";
 
 const currentYear = new Date().getFullYear();
-const sponsorMailto = `mailto:${mail_llegada_correos_patrocinios}?subject=${encodeURIComponent(
+const sponsorMailto = `mailto:${correo_patrocinio}?subject=${encodeURIComponent(
   "Queremos formar parte de la familia TARS Robotics UPV"
 )}`;
 
