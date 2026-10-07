@@ -40,8 +40,8 @@ const entities = (EntitiesData.entities || []) as Entity[];
         Las empresas e instituciones que apoyan nuestras ideas, prototipos y competiciones.
       </p>
       <div class="-mt-4 mb-10 flex flex-wrap gap-3">
-        <BrandButton href={enlace_ser_patrocinador || "#patrocinadores"} variant="light">Ser patrocinador</BrandButton>
-        <BrandButton href={enlace_dossier_patrocinio || "#patrocinadores"}>Consigue el dossier</BrandButton>
+        <BrandButton href={enlace_ser_patrocinador} variant="light">Ser patrocinador</BrandButton>
+        <BrandButton href={enlace_dossier_patrocinio} external>Consigue el dossier</BrandButton>
       </div>
       <SponsorTiers detailed />
     </section>
